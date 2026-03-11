@@ -38,5 +38,5 @@ shakl = input("Qaysi shakl kerak").lower()
 if shakl in formulalar:
 	result = formulalar[shakl] ()
 	print(f"Natija {result}")
-else:
+else:					
 	print("Bunday shakl yoq")
