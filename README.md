@@ -1,14 +1,22 @@
-Systems of Equations Solver
-​This is a simple Python program that solves a system of two linear equations of the form:
+# Python Fundamentals: Dictionary Exercises
 
-ax + by = c
-​How to use:
-​Run the script systems_of_equations.py.
+Welcome to my Python practice repository! This project contains a series of exercises focused on mastering **Python Dictionaries**, developed while following the "Sariq Dev" (Anvar Narzullaev) Python course.
 
-​Enter the coefficients (a, b, and c) for both equations when prompted.
-​The program will output the values of x and y.
+## 📂 Project Overview
+This repository showcases my progress in understanding data structures, specifically focusing on key-value pairs, nested dictionaries, and sorting algorithms in Python.
 
-​Requirements:
+### Exercises Included:
+* **`01_student_grades.py`**: Managing student data and calculating averages using list-in-dictionary structures.
+* **`02_country_capitals.py`**: Implementing a lookup system for country capitals with user input handling.
+* **`03_restaurant_menu.py`**: A dynamic order processing system using price-mapped menus.
+* **`04_country_populations.py`**: Advanced data sorting using `sorted()` with `lambda` functions to rank countries by population.
 
-​This program uses the SymPy library. You can install it using:
-pip install sympy
+## 🚀 Key Concepts Learned
+* **Dictionary Operations**: Adding, accessing, and iterating through key-value pairs.
+* **Data Nesting**: Storing lists and other dictionaries within dictionaries.
+* **Sorting Techniques**: Using `items()` and `lambda` expressions to sort complex data structures by specific values.
+* **Input Handling**: Creating interactive programs with validation and formatting.
+
+---
+*Feel free to explore the code and see how I applied these concepts to solve real-world logic problems!*
+
