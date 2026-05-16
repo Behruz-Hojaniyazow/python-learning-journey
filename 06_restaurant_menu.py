@@ -21,7 +21,7 @@ total_price = 0
 orders = []
 #asking 3 dishes from the user
 for i in range(1,4):
-  query = input(f"{i} What kind of food do you want to order ?")
+  query = input(f"{i} What kind of food do you want to order ?").title()
   if query in restaurant_menu:
     print(f"Okay, {query} will be ready in 5 minutes")
     orders.append(query)
@@ -30,4 +30,4 @@ for i in range(1,4):
     print(f"Sorry we don't have {query} in our menu")
 print("=" * 30)
 print(f"Your orders: {', '.join(orders)}")
-print(f"Total cost {total_price}")
+print(f"Total cost ${total_price}")
