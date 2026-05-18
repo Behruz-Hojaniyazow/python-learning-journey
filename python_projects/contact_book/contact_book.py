@@ -6,14 +6,15 @@ def add_contact():
   contacts = []
   order = 1
   
+  print("\nType 'stop' to finish!")
   # Start collecting contact information
   while True:
-    print(f"{order}-Enter information about a person!")
-    name = input("Name: or type(stop) to stop adding contacts: ").strip()
+    print(f"\n{order}-Enter information about a person!")
+    name = input("Name: or (stop): ").strip()
     
     # Stop adding contacts
     if name.lower() == 'stop':
-      print("Adding contacts stopped")
+      print("\nAdding contacts stopped")
       break
     
     # Validate name input
@@ -28,8 +29,19 @@ def add_contact():
       print("❌️ Phone number cannot be empty!")
       continue
     
-    if not phone_num.isdigit():
+    if not phone_num.isdigit() or len(phone_num) < 7:
       print("❌️ Phone number must contain only digits!")
+      continue
+    
+    # Check duplicate contacts
+    duplicate_found = False
+    
+    for contact in contacts:
+      if contact['name'].lower() == name.lower():
+        print("\n❌️ This contact already exists!")
+        duplicate_found = True
+        break
+    if duplicate_found:
       continue
     
     # Create Contact dictionary
@@ -61,7 +73,7 @@ def show_contacts(contacts):
   for contact in contacts:
     print(
       f"{contact['name'].title():<15} | "
-      f"{contact['phone']:<20}"
+      f"+{contact['phone']:<20}"
     )
   print("=" * 43)
   
@@ -70,7 +82,7 @@ def search_contact(contacts):
   
   # Return early if there are no saved contacts
   if not contacts:
-    print("\n📂 No Contacts Found")
+    print("\n📂 No Contacts found to search")
     return
   
   while True:
@@ -93,13 +105,13 @@ def search_contact(contacts):
         print("\nYes! This user is in Contact!")
         print(
           f"{contact['name'].title()} | "
-          f"{contact['phone']}"
+          f"+{contact['phone']}"
         )
         found = True
         break
       
     if not found:
-      print(f"No contacts found named {user_input.title()}")
+      print(f"\nNo contacts found named {user_input.title()}")
       
 def delete_contact(contacts):
   """Delete a contact from the contact list"""
@@ -128,7 +140,7 @@ def delete_contact(contacts):
         
         while True:
           
-          confirm = input(f"\nDelete{contact['name'].title()}? ").strip().lower()
+          confirm = input(f"\nDelete {contact['name'].title()}? (yes/no) ").strip().lower()
           
           if confirm in ('yes', 'y') :
             contacts.remove(contact)
@@ -143,10 +155,10 @@ def delete_contact(contacts):
             return
         
           else:
-            print("\nPlease type yez or no!")
+            print("\nPlease type yes or no!")
         
     if not deleted:
-      print(f"No contact found named {user_input.title()}")
+      print(f"\nNo contact found named {user_input.title()}")
       
 def save_contacts(contacts):
   """Save contacts to a text file"""
@@ -154,22 +166,20 @@ def save_contacts(contacts):
   filename = 'contacts_info.txt'
   
   if not contacts:
-    print("📂 Not contacts info found to write!")
+    print("\n📂 Not contacts info found to write!")
     return
   
   try:
     
-    with open (filename, 'a', encoding = 'utf-8') as f:
+    with open (filename, 'w', encoding = 'utf-8') as f:
         
-      header = 
-      f"{"Name":<15} | "
+      header = f"{"Name":<15} | "
       f"{"Phone Number":<20}\n"
       f.write(header)
         
       for contact in contacts:
-        formatted_contact = 
-        f"{contact['name'].title():<15} | "
-        f"{contact['phone']:<20}\n"
+        formatted_contact = f"{contact['name'].title():<15} | "
+        f"+{contact['phone']:<20}\n"
         f.write(formatted_contact)
         
       print("\nContacts Saved to the file successfully! ✅️")
@@ -182,7 +192,54 @@ def save_contacts(contacts):
     
 def exit_app():
   """Exit the application gracefully"""
-  print("Thanks for using Kryos Contact Book, GoodBye!")
+  print("\nThanks for using Kryos Contact Book, GoodBye!")
   
   sys.exit()
 
+def main():
+  
+  contacts = []
+  
+  menu_actions = {
+    '1' : 'Add Contact',
+    '2' : 'Show Contacts',
+    '3' : 'Search Contacts',
+    '4' : 'Delete Contacts',
+    '5' : 'Save Contacts to the File',
+    '6' : 'Exit app'
+  }
+  
+  while True:
+    print("\n" + "=" * 40)
+    print("Welcome to KRYOS Contact Book!")
+    print("-" * 40)
+    for key, value in menu_actions.items():
+      print(f"{key} -> {value}")
+    print("=" * 40)
+    
+    choice = input("\nChoose an action: ").strip()
+    
+    if choice == '1':
+      new_contacts = add_contact()
+      contacts.extend(new_contacts)
+      
+    elif choice == '2':
+      show_contacts(contacts)
+      
+    elif choice == '3':
+      search_contact(contacts)
+      
+    elif choice == '4':
+      delete_contact(contacts)
+      
+    elif choice == '5':
+      save_contacts(contacts)
+      
+    elif choice == '6':
+      exit_app()
+      
+    else:
+      print("\n❌️Invalid choice, Please choose (1 to 6)")
+      
+if __name__ == '__main__':
+  main()
