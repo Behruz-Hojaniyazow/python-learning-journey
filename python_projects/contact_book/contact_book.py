@@ -127,7 +127,9 @@ def delete_contact(contacts):
       if user_input.lower() == contact['name'].lower():
         
         while True:
+          
           confirm = input(f"\nDelete{contact['name'].title()}? ").strip().lower()
+          
           if confirm in ('yes', 'y') :
             contacts.remove(contact)
             print(f"\n{contact['name'].title()} was deleted successfully!")
@@ -174,5 +176,13 @@ def save_contacts(contacts):
       
   except IOError as e:
     print(f"File error - {e}")
+    
   except Exception as e:
     print(f"An error occured - {e}")
+    
+def exit_app():
+  """Exit the application gracefully"""
+  print("Thanks for using Kryos Contact Book, GoodBye!")
+  
+  sys.exit()
+
