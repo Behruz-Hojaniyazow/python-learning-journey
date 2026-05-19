@@ -131,7 +131,56 @@ def save_students(students):
   except Exception as e:
     print(f"\nUnexpected Error - {e}")
     
-
+def delete_students(students):
+  """Function that deletes students from the Class Register"""
+  
+  if not students:
+    print("\nNo students found to delete")
+    return
+  
+  print("\nEnter a student name to delete")
+  print("or type 'stop' to stop deleting")
+  while True:
+    choice = input('\nName or (stop): ').strip()
+    
+    if not choice:
+      print("\nName cannot be empty")
+      continue
+    
+    if choice == 'stop':
+      print("\nStudent deletion stopped")
+      break
+    
+    deleted = False
+    
+    for student in students[:]:
+      if choice.lower() == student['name'].lower():
+        
+        while True:
+        
+          confirm = input(f"\nDelete {student['name'].title()} (yes/no): ").strip().lower()
+          if confirm in ('yes', 'y'):
+            students.remove(student)
+          
+            print(f"\n{student['name'].title()} was deleted successfully!")
+          
+            if len(students) > 1:
+              print(f"{len(students)} students left in the Class Register")
+          
+            else:
+              print(f"{len(students)} student left in the Class Register")
+          
+            return
+        
+          elif confirm in ('no', 'n'):
+            print(f"\n{student['name'].title()} was not deleted!")
+            return
+        
+          else:
+            print("\nPlease type 'yes or no'!")
+          
+    if not deleted:
+      print(f"\nNo student found named {choice.title()}!")
       
 def exit_app():
   """Exit the application gracefully"""
@@ -147,7 +196,8 @@ def main():
     '2' : 'Show Student',
     '3' : 'Search Student',
     '4' : 'Save Students to the file',
-    '5' : 'Exit App'
+    '5' : 'Delete Student',
+    '6' : 'Exit App'
   }
   
   # Main application loop
@@ -175,7 +225,11 @@ def main():
       save_students(students)
       
     elif choice == '5':
+      delete_students(students)
+      
+    elif choice == '6':
       exit_app()
+      
     else:
       print("\n❌️ Error: Invalid choice, Choose 1 to 4!")
       
