@@ -114,9 +114,7 @@ def save_students(students):
     
     with open(filename, 'w', encoding = 'utf - 8') as f:
       for student in students:
-        formatted_info = f"{student['name'].title():<15} | "
-        f"{student['age']:<6} | "
-        f"{student['score']:<5}\n"
+        formatted_info = f"{student['name'].title():<15} | {student['age']:<6} | {student['score']:<5}\n"
         f.write(formatted_info)
         
       if len(students) > 1:
