@@ -50,3 +50,78 @@ def recommend_movie(movies):
       
 #all_movies = create_movies()
 #recommend_movie(all_movies)
+
+def add_movie(movies):
+  """Function that adds movies into the existing dictionary"""
+  
+  while True:
+    print("\nType 'stop' to stop adding movies")
+    
+    user_input = input("Do you want to add a new film? (yes/no/stop) ").strip()
+    
+    if user_input.lower() == 'stop' or user_input.lower() == 'no':
+      print("\nAdding movies stopped!")
+      break
+    
+    if user_input in ('yes', 'y'):
+      
+      print("\n --- Existing Genres---\n")
+      
+      for ind, genre in enumerate(movies.keys(), start = 1):
+        print(f"{ind} -> {genre.title()}")
+        print("-" * 35)
+      
+      new_genre = input("Would you like to add a new genre (yes/no)? ").strip()
+      
+      if not new_genre:
+        print("\nAnswer name cannot be empty")
+        continue
+      
+      if new_genre.lower() in ('yes', 'y'):
+        selected_genre = input(f"Enter a new genre: ").strip()
+        if not selected_genre:
+          print("\nGenre name cannot be empty")
+          continue
+        
+        if selected_genre.lower() in [g.lower() for g in movies.keys()]:
+          print("\nThis genre already exists")
+          print("Please enter a new genre!")
+          continue
+      elif new_genre.lower() in ('no', 'n'):
+        selected_genre = input("What genre of movie would you like to add (write the name): ").strip()
+        
+        if not selected_genre:
+          print("\nGenre name cannot be empty!")
+          continue
+        
+        if selected_genre.lower() not in [g.lower() for g in movies.keys()]:
+          print("No such genre found, Please select an existing genre!")
+          continue
+        
+      else:
+        print("Wrong Command")
+        continue
+      
+      movie_name = input(f"What movie would you like to add for {selected_genre.title()} genre? ").strip()
+  
+      if not movie_name:
+        print("\nMovie name cannot be empty")
+        continue
+  
+      all_existing_movies = []
+      for movies_list in movies.values():
+        for m in movies_list:
+          all_existing_movies.append(m.lower())
+      
+      if movie_name.lower() in all_existing_movies:
+        print("\nThis movie is already in the database!")
+        continue
+  
+      if new_genre.lower() in ('yes', 'y'):
+        movies[selected_genre] = [movie_name]
+    
+      else:
+        movies[selected_genre].append(movie_name)
+      print(f"✅️ Great! The movie '{movie_name.title()}' has been successfully added!")
+#new_genres = create_movies()
+#add_movie(new_genres)
