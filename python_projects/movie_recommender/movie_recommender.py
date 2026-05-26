@@ -125,3 +125,44 @@ def add_movie(movies):
       print(f"✅️ Great! The movie '{movie_name.title()}' has been successfully added!")
 #new_genres = create_movies()
 #add_movie(new_genres)
+
+def search_movie(movies):
+  """Function that finds a movie entered by the user"""
+  
+  if not movies:
+    print("\nNo movie found, Database is empty!")
+    return
+  
+  while True:
+    print("\nType 'stop' to stop searching!")
+    user_input = input("Enter a movie that you need: ").strip()
+    
+    if user_input.lower() == 'stop':
+      print("\nSearching movie stopped")
+      break
+    
+    if not user_input:
+      print("\nMovie name cannot be empty!")
+      continue
+    
+    found_genre = ""
+    found_movie = ""
+    found = False
+    
+    for genre, movies_list in movies.items():
+      for movie in movies_list:
+        if user_input.lower() == movie.lower():
+          found_genre = genre
+          found_movie = movie
+          found = True
+      if found:
+        break
+    if found:
+      print(f"\nYes, This movie was found")
+      print(f"Genre: {found_genre.title()}")
+      print(f"Movie title: {found_movie.title()}")
+    else:
+      print(f"\nUnfortuntely, {user_input.title()} movie not found")
+      
+search_movies = create_movie()
+search_movie(search_movies)
