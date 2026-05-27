@@ -164,5 +164,59 @@ def search_movie(movies):
     else:
       print(f"\nUnfortuntely, {user_input.title()} movie not found")
       
-search_movies = create_movie()
-search_movie(search_movies)
+#search_movies = create_movie()
+#search_movie(search_movies)
+
+def delete_movie(movies):
+  """Function that deletes movies entered by the user"""
+  
+  if not movies:
+    print("\nThere's no film to delete, Database is empty")
+    return
+  
+  while True:
+    print("\nType stop to stop deleting")
+    user_input = input("\nWhich movie would you like to delete: ").strip()
+    
+    if not user_input:
+      print("\nMovie name cannot be empty")
+      continue
+    
+    if user_input.lower() == 'stop':
+      print("\nDeleting movies stopped!")
+      break
+    
+    movie_found = False
+    
+    for genre, movies_list in movies.items():
+      for movie in movies_list:
+        if user_input.lower() == movie.lower():
+          movie_found = True
+          
+          while True:
+            print("\nYes, this movie was found")
+            print(f"Genre: {genre.title()}")
+            print(f"Movie title: {movie.title()}")
+            
+            movie_delete = input(f"\nDelete {movie.title()} (yes/no): ").strip().lower()
+        
+            if movie_delete in ('yes', 'y'):
+              movies_list.remove(movie)
+              print(f"\n{movie.title()} has been successfully deleted!")
+              break
+            
+            if movie_delete in ('no', 'n'):
+              print(f"\n{found_movie.title()} was not deleted")
+              break
+            
+            else:
+              print("\nInvalid choice, Please choose only 'yes' or 'no'")
+              
+      if movie_found:
+        break
+              
+    if not movie_found:
+      print(f"\nNo movie found named {user_input.title()}!")
+
+#remove_movie = create_movies()
+#delete_movie(remove_movie)
