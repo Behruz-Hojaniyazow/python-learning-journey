@@ -248,3 +248,10 @@ def show_movies(movies):
       
 #all_movies = create_movies()
 #show_movies(all_movies)
+
+def exit_app():
+  """Exit the application gracefully"""
+  
+  print("\nThank you for using Kryos Movie program, GoodBye!")
+  
+  sys.exit()
