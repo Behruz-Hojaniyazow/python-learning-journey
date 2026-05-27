@@ -220,3 +220,31 @@ def delete_movie(movies):
 
 #remove_movie = create_movies()
 #delete_movie(remove_movie)
+
+def show_movies(movies):
+  """Function that shows all existing movies"""
+  
+  if not movies:
+    print("\nNo movies found to show")
+    return
+  
+  print("=" * 40)
+  print("     🎬   All Existing Movies   🎬")
+  print("=" * 40)
+  
+  for genre, movies_list in movies.items():
+    movie_number = len(movies_list)
+    plural_suffix = 'movie' if movie_number == 1 else "movies"
+    print(f"\n📌 {genre.upper()} ({movie_number} {plural_suffix}):")
+    print("-" * 40)
+    
+    if movie_number == 0:
+      print("   (There are no movies in this genre yet!)")
+      
+    else:
+      for ind, movie in enumerate(movies_list, start=1):
+        print(f"   {ind}. {movie.title()}")
+  print("\n" + "=" * 40)
+      
+#all_movies = create_movies()
+#show_movies(all_movies)
