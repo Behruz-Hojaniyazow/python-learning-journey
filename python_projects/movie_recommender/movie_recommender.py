@@ -14,7 +14,7 @@ def create_movies():
   return movies
 
 def recommend_movie(movies):
-  """Function that recommends a movia depending on a users genre"""
+  """Function that recommends a movie depending on a users genre"""
   
   if not movies:
     print("\nNo new movies to watch!")
@@ -41,6 +41,11 @@ def recommend_movie(movies):
     if user_choice.isdigit() and 1 <= int(user_choice) <= len(genre_names):
       selected_genre = genre_names[int(user_choice) -1]
       movies_list = movies[selected_genre]
+      
+      if not movies_list:
+        print(f"\nNo movies left in {selected_genre.title()} genre!")
+        continue
+      
       chosen_movie = random.choice(movies_list)
       print(f"\n🍿 Recommended movie for you: {chosen_movie.title()} ({selected_genre.title()}) genre!")
       print("Enjoy your view!")
@@ -63,7 +68,7 @@ def add_movie(movies):
       print("\nAdding movies stopped!")
       break
     
-    if user_input in ('yes', 'y'):
+    if user_input.lower() in ('yes', 'y'):
       
       print("\n --- Existing Genres---\n")
       
@@ -87,6 +92,7 @@ def add_movie(movies):
           print("\nThis genre already exists")
           print("Please enter a new genre!")
           continue
+        selected_genre = selected_genre.lower()
       elif new_genre.lower() in ('no', 'n'):
         selected_genre = input("What genre of movie would you like to add (write the name): ").strip()
         
@@ -97,6 +103,7 @@ def add_movie(movies):
         if selected_genre.lower() not in [g.lower() for g in movies.keys()]:
           print("No such genre found, Please select an existing genre!")
           continue
+        selected_genre = selected_genre.lower()
         
       else:
         print("Wrong Command")
@@ -155,6 +162,7 @@ def search_movie(movies):
           found_genre = genre
           found_movie = movie
           found = True
+          break
       if found:
         break
     if found:
@@ -162,7 +170,7 @@ def search_movie(movies):
       print(f"Genre: {found_genre.title()}")
       print(f"Movie title: {found_movie.title()}")
     else:
-      print(f"\nUnfortuntely, {user_input.title()} movie not found")
+      print(f"\nUnfortunately, {user_input.title()} movie not found")
       
 #search_movies = create_movie()
 #search_movie(search_movies)
@@ -198,20 +206,22 @@ def delete_movie(movies):
             print(f"Genre: {genre.title()}")
             print(f"Movie title: {movie.title()}")
             
-            movie_delete = input(f"\nDelete {movie.title()} (yes/no): ").strip().lower()
+            movie_delete = input(f"\nDelete {movie.title()} (yes/no): ").strip()
         
-            if movie_delete in ('yes', 'y'):
+            if movie_delete.lower() in ('yes', 'y'):
               movies_list.remove(movie)
               print(f"\n{movie.title()} has been successfully deleted!")
               break
             
-            if movie_delete in ('no', 'n'):
-              print(f"\n{found_movie.title()} was not deleted")
+            elif movie_delete.lower() in ('no', 'n'):
+              print(f"\n{movie.title()} was not deleted")
               break
             
             else:
               print("\nInvalid choice, Please choose only 'yes' or 'no'")
               
+          break
+        
       if movie_found:
         break
               
@@ -234,7 +244,7 @@ def show_movies(movies):
   
   for genre, movies_list in movies.items():
     movie_number = len(movies_list)
-    plural_suffix = 'movie' if movie_number == 1 else "movies"
+    plural_suffix = ('movie' if movie_number == 1 else "movies")
     print(f"\n📌 {genre.upper()} ({movie_number} {plural_suffix}):")
     print("-" * 40)
     
@@ -255,3 +265,50 @@ def exit_app():
   print("\nThank you for using Kryos Movie program, GoodBye!")
   
   sys.exit()
+  
+def main():
+  
+  kryos_movies = create_movies()
+  
+  menu_actions = {
+    '1' : 'recommend movie',
+    '2' : 'add movie',
+    '3' : 'search movie',
+    '4' : 'delete movie',
+    '5' : 'show movies',
+    '6' : 'exit app'
+  }
+  while True:
+    print("\n" + "=" * 35)
+    print("Welcome to Kryos Movie Program")
+    print("=" * 35)
+    for key, value in menu_actions.items():
+      print(f"{key} -> {value.title()}")
+      
+    user_choice = input("Choose an action: ").strip()
+    
+    if user_choice == '1':
+      recommend_movie(kryos_movies)
+      
+    elif user_choice == '2':
+      add_movie(kryos_movies)
+      
+    elif user_choice == '3':
+      search_movie(kryos_movies)
+      
+    elif user_choice == '4':
+      delete_movie(kryos_movies)
+    
+    elif user_choice == '5':
+      show_movies(kryos_movies)
+      
+    elif user_choice == '6':
+      exit_app()
+      
+    else:
+      print("\nInvalid choice, Please choose only (1 to 6)")
+      
+    
+      
+if __name__ == '__main__':
+  main()
