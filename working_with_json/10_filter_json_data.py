@@ -87,7 +87,7 @@ def filter_cars(cars):
   for car, info in filtered_cars.items():
     print(f"Car: {car.upper()}")
     print(f" - Color: {info['color']}")
-    print(f" - Price: {info['price']}")
+    print(f" - Price: ${info['price']}")
     print(f" - Type: {info['type']}")
     print("-" * 20)
     
