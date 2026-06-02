@@ -1,117 +1,213 @@
-# 📒 KRYOS Contact Book
+📖 KRYOS Contact Book
 
-A simple and professional command-line Contact Book application built with Python.  
-This project allows users to manage contacts, save them into a text file, and read saved contact information with proper formatting and exception handling.
+A simple yet powerful command-line Contact Book application built with Python.
+
+This project allows users to manage contacts efficiently using a JSON-based storage system. It includes contact creation, searching, deletion, data persistence, logging, validation, error handling, and graceful application shutdown.
 
 ---
 
-# 🚀 Features
+🚀 Features
 
 - ➕ Add new contacts
-- 📋 Show all contacts
-- 🔍 Search contacts
-- ❌ Delete contacts
-- 💾 Save contacts to a text file
-- 📂 Read contacts from saved file
-- 🚫 Duplicate contact protection
-- ✅ Phone number validation
-- ⚠️ Exception handling for file operations
-- 🧹 Clean and formatted terminal output
+- 📋 Display all contacts
+- 🔍 Search contacts by name
+- 🗑️ Delete contacts
+- 💾 Automatic JSON data storage
+- 🚫 Duplicate contact prevention
+- 🚫 Duplicate phone number prevention
+- ☎️ International phone number validation ("+998901234567")
+- 🔤 Alphabetical contact sorting
+- 📝 Logging system
+- ⚠️ Error handling and recovery
+- 🛑 Graceful application shutdown
+- 📂 Persistent data storage
 
 ---
 
-# 🛠️ Technologies Used
+🛠 Technologies Used
 
 - Python 3
+- JSON
+- Logging Module
 - File Handling
-- Exception Handling
 - Functions
-- Lists & Dictionaries
-- UTF-8 Encoding
+- Loops
+- Dictionaries
+- Lists
+- Exception Handling
 
 ---
 
-# 📁 Project Structure
+📂 Project Structure
 
-```bash
 contact_book/
 │
-├── contact_book.py          # Main contact book application
-├── contact_file_reader.py   # Reads saved contact data
-├── contacts_info.txt        # Saved contacts file
+├── contact_book.py
+├── contacts_info.json
+├── app.log
 └── README.md
-```
 
 ---
 
-# ▶️ How to Run
+📌 Contact Data Structure
 
-## Run the main application
+Each contact is stored as a dictionary:
 
-```bash
+{
+    "name": "John Doe",
+    "phone": "+998901234567"
+}
+
+All contacts are stored inside a JSON file.
+
+---
+
+🔒 Validation Rules
+
+Name Validation
+
+- Name cannot be empty.
+
+Phone Number Validation
+
+- Must start with "+"
+- Must contain only digits after "+"
+- Must be longer than 8 characters
+- Duplicate phone numbers are not allowed
+
+Examples:
+
+✅ Valid
+
++998901234567
++447123456789
++12025550123
+
+❌ Invalid
+
+998901234567
++99890abc123
++123
+
+---
+
+📋 Menu Options
+
+1 -> Add Contact
+2 -> Show Contacts
+3 -> Search Contacts
+4 -> Delete Contact
+5 -> Exit App
+
+---
+
+📝 Logging System
+
+The application uses Python's logging module.
+
+Log Levels
+
+- DEBUG
+- INFO
+- WARNING
+- ERROR
+- CRITICAL
+
+Logged Events
+
+- Contact creation
+- Contact deletion
+- Search operations
+- Invalid user input
+- JSON errors
+- File errors
+- Critical system failures
+
+Log records are automatically written to:
+
+app.log
+
+---
+
+⚠️ Error Handling
+
+The application safely handles:
+
+- Missing JSON files
+- Invalid JSON format
+- File I/O errors
+- Unexpected exceptions
+- KeyboardInterrupt ("Ctrl + C")
+
+This prevents the program from crashing unexpectedly.
+
+---
+
+💾 Data Persistence
+
+Contacts are automatically saved after:
+
+- Adding a contact
+- Deleting a contact
+
+Data remains available after restarting the application.
+
+---
+
+🎯 Learning Objectives
+
+This project was built to practice:
+
+- Functions
+- JSON handling
+- File operations
+- Logging
+- Exception handling
+- CRUD operations
+- Data validation
+- Python project structure
+- Clean code principles
+
+---
+
+▶️ How To Run
+
 python contact_book.py
-```
-
-## Run the contact file reader
-
-```bash
-python contact_file_reader.py
-```
 
 ---
 
-# 📌 Example Menu
+📸 Example
 
-```text
 ========================================
 Welcome to KRYOS Contact Book!
 ----------------------------------------
 1 -> Add Contact
 2 -> Show Contacts
-3 -> Search Contact
+3 -> Search Contacts
 4 -> Delete Contact
-5 -> Save Contacts
-6 -> Exit
+5 -> Exit App
 ========================================
-```
 
 ---
 
-# 📂 File Saving Format
+📈 Future Improvements
 
-Saved contacts are stored in a formatted structure:
-
-```text
-John Doe        | +998901234567
-Jane Smith      | +998991112233
-```
-
----
-
-# ⚡ Error Handling
-
-The project handles common file-related errors such as:
-
-- File not found
-- Empty file
-- Input validation errors
-- Unexpected exceptions
+- Update/Edit Contact
+- Export Contacts
+- Import Contacts
+- Contact Categories
+- Favorites System
+- SQLite Database Support
+- Object-Oriented Refactor (OOP)
+- Unit Testing
 
 ---
 
-# 🎯 Future Improvements
+👨‍💻 Author
 
-- Edit existing contacts
-- Export contacts to CSV
-- GUI version with Tkinter
-- Database integration (SQLite)
-- Password protection
+Behruz
 
----
-
-# 👨‍💻 Author
-
-Developed by Behruz
+Built as part of a Python learning journey focused on writing real-world projects and improving software development skills.
 
 ---
 
