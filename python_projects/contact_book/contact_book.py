@@ -119,7 +119,7 @@ def add_contact():
       print("\n❌️ Must start with '+' !")
       continue
     
-    if not phone_num[1:].isdigit() and len(phone_num) <= 8:
+    if not phone_num[1:].isdigit() or len(phone_num) <= 8:
       logger.warning(f"ERROR adding contact ({name.title()}): Invalid phone number format: {phone_num}")
       print("\n❌️ Only digits are allowed after '+' \nand must be longer than 8 digits!")
       continue
@@ -209,7 +209,7 @@ def search_contact():
         print("\nYes! This user is in Contact!")
         print(
           f"{contact['name'].title()} | "
-          f"+{contact['phone']}"
+          f"{contact['phone']}"
         )
         found = True
         break
@@ -255,7 +255,7 @@ def delete_contact():
             save_contacts(contacts)
             
             # PROFESSIONAL LOG: We mark data deletion with WARNING OR INFO
-            logger.warning(f"CONTACT WAS DELETED: Name {contact['name'].title()}, Phone Number {contact['phone_num']}")
+            logger.warning(f"CONTACT WAS DELETED: Name {contact['name'].title()}, Phone Number {contact['phone']}")
             
             print(f"\n{contact['name'].title()} was deleted successfully!")
             
@@ -277,7 +277,7 @@ def delete_contact():
                                   
         break                      
     if not deleted:
-      logger.info(f"Delete failed: Contact named {user_input.title()} does not exist in thr database")
+      logger.info(f"Delete failed: Contact named {user_input.title()} does not exist in the database")
       print(f"\nNo contact found named {user_input.title()}")
     
 def exit_app():
@@ -332,7 +332,7 @@ def main():
     
   except Exception as e:
     # Any unexpected critical error in the program goes here
-    logging.critical(f"A critical system error has occured and the program has stopped! Global Error - {e}", exc_info=True)
+    logger.critical(f"A critical system error has occured and the program has stopped! Global Error - {e}", exc_info=True)
     print("\n❌️ A serious system error has occured, Please contact your adminstrator")
     sys.exit(1)
   
