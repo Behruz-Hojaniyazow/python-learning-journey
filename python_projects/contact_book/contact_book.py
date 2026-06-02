@@ -163,11 +163,13 @@ def show_contacts():
     print("\n📂 No Contacts found!")
     return
   
+  sorted_contacts = sorted(contacts, key=lambda x: x['name'].lower())
+  
   # Display All Contacts
   print('\n' + '=' * 43)
   print(f" {'Name':<17} | {'Phone Number':<20}")
   print('-' * 43)
-  for index, contact in enumerate(contacts, start=1):
+  for index, contact in enumerate(sorted_contacts, start=1):
     print(
       f"{index}. "
       f"{contact['name'].title():<15} | "
