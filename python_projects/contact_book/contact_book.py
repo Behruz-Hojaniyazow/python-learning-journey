@@ -133,7 +133,22 @@ def add_contact():
         print("\n❌️ This contact already exists!")
         duplicate_found = True
         break
+      
     if duplicate_found:
+      continue
+    
+    # check duplicate phone numbers
+    duplicate_phone_found = False
+    
+    for contact in contacts:
+      if contact['phone'] == phone_num:
+        logger.warning(f"ERROR adding contact: ({name.title()}), ({phone_num}): This phone number already exists!")
+        print("\n❌️ This phone number already exists!")
+        
+        duplicate_phone_found = True
+        break
+      
+    if duplicate_phone_found:
       continue
     
     # Create Contact dictionary
