@@ -3,8 +3,29 @@ import json
 import logging
 
 FILE_NAME = 'contacts_info.json'
+LOG_FILE = 'app.log'
 
-logging.basicConfig(level=logging.ERROR)
+# creating a log
+logger = logging.getLogger('ContactBook')
+logger.setLevel(logging.DEBUG) # Accepts logs of all levels
+
+# 1.Handler for writing to a file(ALL ERROR and CRITICAL ERRORS are written to a file for analysis)
+file_handler = logging.FileHandler(LOG_FILE, encoding='utf-8')
+file_handler.setLevel(logging.ERROR)
+file_formatter = logging.Formatter(
+  '[%(asctime)s] %(levelname)s [%(name)s:%(filename)s:%(lineno)d] - %(message)s'
+)
+file_handler.setFormatter(file_formatter)
+
+# 2.Handler for output to the console (Only for the user or programmer can see on the screen)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter('%(levelname)s: %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# Add handlers to the loggger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 def load_contacts():
   """
@@ -25,15 +46,21 @@ def load_contacts():
       return contacts
       
   except FileNotFoundError:
+    # It is normal for file not to exist(when opened for the first time) this can be done with a small warning (DEBUG)
+    logger.debug(f"\n{FILE_NAME} not found, returned an empty list")
     
     return []
 
   except json.JSONDecodeError as e:
-    logging.error(f"\nInvalid JSON format - {e}")
+    # JSON structure is corrupted - this is a serious error!
+    logger.exception(f"\nInvalid JSON format - {e}")
     
     return []
     
-  
+  except Exception as e:
+    logger.exception(f"\nUnexpected error occured (load_contacts) - {e}")
+    
+    return []
     
 def save_contacts(contacts):
   """Save contacts to a json file"""
@@ -47,12 +74,13 @@ def save_contacts(contacts):
         indent=4,
         ensure_ascii=False
       )
+    logger.info("Contacts were saved successfully")
       
   except IOError as e:
-    print(f"File error - {e}")
+    logger.exception(f"File error - {e}")
     
   except Exception as e:
-    print(f"An error occured - {e}")
+    logger.exception(f"An error occured while saving contacts - {e}")
       
 def add_contact():
   """Collect contact information from the user and store it in a list"""
@@ -68,11 +96,13 @@ def add_contact():
     
     # Stop adding contacts
     if name.lower() == 'stop':
+      logger.info("User stopped adding contacts")
       print("\nAdding contacts stopped")
       break
     
     # Validate name input
     if not name:
+      logger.warning("ERROR adding contact: Contact name left blank")
       print("❌️Name cannot be empty!")
       continue
     
@@ -80,11 +110,18 @@ def add_contact():
     
     # Validate phone number
     if not phone_num:
+      logger.warning(f"ERROR adding contact {name.title()}: Phone number left blank")
       print("❌️ Phone number cannot be empty!")
       continue
     
-    if not phone_num.isdigit() or len(phone_num) < 7:
-      print("❌️ Phone number must contain only digits!")
+    if not phone_num.startswith('+'):
+      logger.warning(f"ERROR adding contact ({name.title()}): Phone number wasn't started with '+': {phone_num}")
+      print("\n❌️ Must start with '+' !")
+      continue
+    
+    if not phone_num[1:].isdigit() and len(phone_num) <= 8:
+      logger.warning(f"ERROR adding contact ({name.title()}): Invalid phone number format: {phone_num}")
+      print("\n❌️ Only digits are allowed after '+' \nand must be longer than 8 digits!")
       continue
     
     # Check duplicate contacts
@@ -92,6 +129,7 @@ def add_contact():
     
     for contact in contacts:
       if contact['name'].lower() == name.lower():
+        logger.warning(f"ERROR adding contact ({name.title()}): This contact already exists")
         print("\n❌️ This contact already exists!")
         duplicate_found = True
         break
@@ -107,9 +145,13 @@ def add_contact():
     # Save contact
     contacts.append(contact)
     save_contacts(contacts)
+    
+    # PROFESSIONAL LOG: Who was joined
+    logger.info(f"New contact was saved successfully: Name: {name.title()}, Phone number: {phone_num}")
+    
     order += 1
     
-    print("✅️\nContact saved successfully!")
+    print("✅️\nContact was saved successfully!")
   
 def show_contacts():
   """Display all saved contacts in a formatted table"""
@@ -129,7 +171,7 @@ def show_contacts():
     print(
       f"{index}. "
       f"{contact['name'].title():<15} | "
-      f"+{contact['phone']:<20}"
+      f"{contact['phone']:<20}"
     )
   print("=" * 43)
   
@@ -140,6 +182,7 @@ def search_contact():
   
   # Return early if there are no saved contacts
   if not contacts:
+    logger.info("Search failed, Contact list is empty")
     print("\n📂 No Contacts found to search")
     return
   
@@ -156,6 +199,9 @@ def search_contact():
       print("\nSearching contact stopped")
       break
     
+    # PROFESSIONAL LOG: Who is the user looking for?
+    logger.info(f"Searching for a contact, Search query: '{user_input}'")
+    
     found = False
     
     for contact in contacts:
@@ -169,6 +215,8 @@ def search_contact():
         break
       
     if not found:
+      # We write at INFO level because this is not an error, just a result not found
+      logger.info(f"Search result: No contact named '{user_input.title()}' found")
       print(f"\nNo contacts found named {user_input.title()}")
       
 def delete_contact():
@@ -204,14 +252,20 @@ def delete_contact():
           
           if confirm in ('yes', 'y') :
             contacts.remove(contact)
+            save_contacts(contacts)
+            
+            # PROFESSIONAL LOG: We mark data deletion with WARNING OR INFO
+            logger.warning(f"CONTACT WAS DELETED: Name {contact['name'].title()}, Phone Number {contact['phone_num']}")
+            
             print(f"\n{contact['name'].title()} was deleted successfully!")
             
-            save_contacts(contacts)
+            
             
             deleted = True
             break
         
           elif confirm in ('no', 'n'):
+            logger.info(f"Deleting contact was refused: {contact['name'].title()}")
             print(f"\n{contact['name'].title()} was not deleted!")
             
             deleted = True
@@ -223,6 +277,7 @@ def delete_contact():
                                   
         break                      
     if not deleted:
+      logger.info(f"Delete failed: Contact named {user_input.title()} does not exist in thr database")
       print(f"\nNo contact found named {user_input.title()}")
     
 def exit_app():
@@ -241,33 +296,45 @@ def main():
     '5' : 'Exit app'
   }
   
-  while True:
-    print("\n" + "=" * 40)
-    print("Welcome to KRYOS Contact Book!")
-    print("-" * 40)
-    for key, value in menu_actions.items():
-      print(f"{key} -> {value}")
-    print("=" * 40)
+  try:
+    while True:
+      print("\n" + "=" * 40)
+      print("Welcome to KRYOS Contact Book!")
+      print("-" * 40)
+      for key, value in menu_actions.items():
+        print(f"{key} -> {value}")
+      print("=" * 40)
     
-    choice = input("\nChoose an action: ").strip()
+      choice = input("\nChoose an action: ").strip()
     
-    if choice == '1':
-      add_contact()
+      if choice == '1':
+        add_contact()
       
-    elif choice == '2':
-      show_contacts()
+      elif choice == '2':
+        show_contacts()
       
-    elif choice == '3':
-      search_contact()
+      elif choice == '3':
+        search_contact()
       
-    elif choice == '4':
-      delete_contact()
+      elif choice == '4':
+        delete_contact()
       
-    elif choice == '5':
-      exit_app()
+      elif choice == '5':
+        exit_app()
       
-    else:
-      print("\n❌️Invalid choice, Please choose (1 to 5)")
-      
+      else:
+        print("\n❌️Invalid choice, Please choose (1 to 5)")
+        
+  except KeyboardInterrupt:
+    # close gracefully without throwing an error when the user presses Ctrl+C
+    print('\n\nProject was stopped by the user')
+    sys.exit(0)
+    
+  except Exception as e:
+    # Any unexpected critical error in the program goes here
+    logging.critical(f"A critical system error has occured and the program has stopped! Global Error - {e}", exc_info=True)
+    print("\n❌️ A serious system error has occured, Please contact your adminstrator")
+    sys.exit(1)
+  
 if __name__ == '__main__':
   main()
