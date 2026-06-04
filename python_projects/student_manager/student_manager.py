@@ -222,10 +222,10 @@ def delete_students():
     print("\nNo students found to delete")
     return
   
-  print("\nEnter a student name to delete")
-  print("or type 'stop' to stop deleting")
+  print("Type 'stop' to stop deleting")
   while True:
-    choice = input('\nName or (stop): ').strip()
+    print("\nEnter a student name to delete")
+    choice = input('Name or (stop): ').strip()
     
     if not choice:
       logger.warning("Error: Name left blank")
