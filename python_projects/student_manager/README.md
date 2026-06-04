@@ -1,55 +1,54 @@
 🎓 Kryos Student Manager
 
-A professional command-line Student Management System built with Python.
+A robust command-line Student Management System built with Python.
 
-This project allows users to manage student records efficiently using JSON-based data storage, input validation, structured logging, and robust error handling.
+This project demonstrates practical use of file handling, JSON data storage, logging, exception handling, input validation, and CRUD operations. It allows users to efficiently manage student records through an interactive terminal interface.
 
 ---
 
 🚀 Features
 
-📌 Student Management
+Student Management
 
 - Add new students
 - View all students
-- Search for students by name
+- Search students by name
 - Delete students from the register
 
-📌 Data Persistence
+JSON-Based Storage
 
-- Stores student data in a JSON file
-- Automatically loads saved data when the program starts
+- Persistent data storage using JSON
+- Automatic data loading on startup
 - Human-readable JSON formatting
 
-📌 Input Validation
+Input Validation
 
 - Prevents empty names
-- Prevents invalid name formats
+- Validates name format
 - Prevents duplicate student records
 - Prevents negative values
 - Validates age range
-- Ensures scores remain within the allowed range
+- Restricts scores to valid limits
 
-📌 Logging System
+Logging System
 
 - Console logging for user feedback
-- File logging for system errors
-- Error tracking with timestamps
+- File logging for error tracking
+- Timestamped log records
 - Critical error reporting
 
-📌 Error Handling
+Error Handling
 
 - Handles missing files safely
 - Handles corrupted JSON files
 - Handles invalid user input
 - Gracefully exits on unexpected errors
-- Supports safe interruption using Ctrl + C
+- Supports safe termination with Ctrl + C
 
-📌 Student Ranking
+Student Ranking
 
-- Automatically sorts students by score
-- Displays students in descending order
-- Alphabetical sorting when scores are equal
+- Sorts students by score (highest first)
+- Uses alphabetical sorting when scores are equal
 
 ---
 
@@ -57,7 +56,7 @@ This project allows users to manage student records efficiently using JSON-based
 
 - Python 3
 - JSON
-- Logging Module
+- Logging
 - Exception Handling
 - File Handling
 
@@ -65,28 +64,32 @@ This project allows users to manage student records efficiently using JSON-based
 
 📂 Project Structure
 
-project/
+python-learning-journey/
 │
-├── main.py
-├── students_info.json
-├── students.log
-└── README.md
+└── python_projects/
+    │
+    └── student_manager/
+        │
+        ├── student_manager.py
+        ├── students_info.json
+        ├── students.log
+        └── README.md
 
 ---
 
 ▶️ How to Run
 
-1. Clone the repository
+1. Clone the Repository
 
-git clone https://github.com/your-username/kryos-student-manager.git
+git clone https://github.com/behruz-hojaniyazow/python-learning-journey.git
 
-2. Navigate to the project directory
+2. Navigate to the Project Folder
 
-cd kryos-student-manager
+cd python-learning-journey/python_projects/student_manager
 
-3. Run the program
+3. Run the Application
 
-python main.py
+python student_manager.py
 
 ---
 
@@ -100,7 +103,7 @@ python main.py
 
 ---
 
-💡 Example Student Record
+📄 Example Student Record
 
 {
     "name": "John",
@@ -112,29 +115,29 @@ python main.py
 
 🔒 Reliability Features
 
-- Duplicate detection
+- Duplicate student detection
 - Data validation
 - Structured logging
-- Persistent storage
+- Persistent JSON storage
 - Exception handling
 - Safe program termination
 
 ---
 
-🎯 Learning Objectives
+🎯 Concepts Practiced
 
-This project demonstrates practical usage of:
+This project demonstrates practical experience with:
 
 - Functions
 - Loops
 - Dictionaries
 - Lists
-- JSON storage
+- JSON Storage
 - Logging
-- Exception handling
-- Input validation
-- CRUD operations
-- Clean code practices
+- Exception Handling
+- Input Validation
+- CRUD Operations
+- Clean Code Principles
 
 ---
 
@@ -142,17 +145,20 @@ This project demonstrates practical usage of:
 
 - Type Hints
 - Object-Oriented Programming (OOP)
-- SQLite Database Integration
+- Dataclasses
+- SQLite Integration
 - Unit Testing
-- Export to CSV
-- Update Student Records
-- GUI Version (Tkinter/PyQt)
+- CSV Export
+- Student Record Updates
+- GUI Version (Tkinter)
 - REST API Version (Flask/FastAPI)
 
 ---
 
 👨‍💻 Author
 
-Behruz
+Behruz Hojaniyazow
 
-Python Developer in Progress 🚀
+Python Developer | Learning by Building Real Projects 🚀
+
+GitHub: https://github.com/behruz-hojaniyazow
