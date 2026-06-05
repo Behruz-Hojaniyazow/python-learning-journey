@@ -23,9 +23,10 @@ console_handler.setLevel(logging.INFO)
 console_formatter = logging.Formatter('%(levelname)s: %(message)s')
 console_handler.setFormatter(console_formatter)
 
-# Add handlers to the loggger
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+if not logger.handlers:
+  # Add handlers to the loggger
+  logger.addHandler(file_handler)
+  logger.addHandler(console_handler)
 
 def load_contacts():
   """
@@ -106,6 +107,19 @@ def add_contact():
       print("❌️Name cannot be empty!")
       continue
     
+    # Check duplicate contacts
+    duplicate_found = False
+    
+    for contact in contacts:
+      if contact['name'].lower() == name.lower():
+        logger.warning(f"ERROR adding contact ({name.title()}): This contact already exists")
+        print("\n❌️ This contact already exists!")
+        duplicate_found = True
+        break
+      
+    if duplicate_found:
+      continue
+    
     phone_num = input("Phone Number: ").strip()
     
     # Validate phone number
@@ -122,19 +136,6 @@ def add_contact():
     if not phone_num[1:].isdigit() or len(phone_num) <= 8:
       logger.warning(f"ERROR adding contact ({name.title()}): Invalid phone number format: {phone_num}")
       print("\n❌️ Only digits are allowed after '+' \nand must be longer than 8 digits!")
-      continue
-    
-    # Check duplicate contacts
-    duplicate_found = False
-    
-    for contact in contacts:
-      if contact['name'].lower() == name.lower():
-        logger.warning(f"ERROR adding contact ({name.title()}): This contact already exists")
-        print("\n❌️ This contact already exists!")
-        duplicate_found = True
-        break
-      
-    if duplicate_found:
       continue
     
     # check duplicate phone numbers
