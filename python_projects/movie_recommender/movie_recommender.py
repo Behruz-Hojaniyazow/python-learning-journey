@@ -24,9 +24,10 @@ console_handler.setLevel(logging.INFO)
 console_formatter = logging.Formatter('%(levelname)s: %(message)s')
 console_handler.setFormatter(console_formatter)
 
-# Add handlers to the logger
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+if not logger.handlers:
+  # Add handlers to the logger
+  logger.addHandler(file_handler)
+  logger.addHandler(console_handler)
 
 def load_movies():
   """
