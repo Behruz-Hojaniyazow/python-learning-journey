@@ -13,11 +13,11 @@ logger = get_logger()
 def main():
   
   menu_actions = {
-    '1' : 'Add Contact',
-    '2' : 'Show Contacts',
-    '3' : 'Search Contacts',
-    '4' : 'Delete Contacts',
-    '5' : 'Exit app'
+    '1' : {'text' : 'Add Contact', 'func' : add_contact},
+    '2' : {'text' : 'Show Contacts', 'func' : show_contacts},
+    '3' : {'text' : 'Search Contacts', 'func' : search_contact},
+    '4' : {'text' : 'Delete Contacts', 'func' : delete_contact},
+    '5' : {'text' : 'Exit app', 'func' : exit_app}
   }
   
   try:
@@ -26,25 +26,13 @@ def main():
       print("Welcome to KRYOS Contact Book!")
       print("-" * 40)
       for key, value in menu_actions.items():
-        print(f"{key} -> {value}")
+        print(f"{key} -> {value['text']}")
       print("=" * 40)
     
       choice = input("\nChoose an action: ").strip()
     
-      if choice == '1':
-        add_contact()
-      
-      elif choice == '2':
-        show_contacts()
-      
-      elif choice == '3':
-        search_contact()
-      
-      elif choice == '4':
-        delete_contact()
-      
-      elif choice == '5':
-        exit_app()
+      if choice in menu_actions:
+        menu_actions[choice]['func']()
       
       else:
         print("\n❌️Invalid choice, Please choose (1 to 5)")
