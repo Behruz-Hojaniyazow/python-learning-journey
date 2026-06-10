@@ -1,77 +1,22 @@
-🎬 KRYOS Movie Recommender
+🎬 Movie Recommender
 
-A command-line movie recommendation and management system built with Python.
+A modular Python CLI application for managing and discovering movies.
 
-This application allows users to discover movies, manage movie collections, search for titles, organize genres, and store data permanently using JSON files.
-
-The project was created as part of a Python learning journey focused on real-world software development concepts such as JSON handling, logging, validation, exception handling, and CRUD operations.
+This project allows users to add, search, delete, display, and get movie recommendations from a categorized movie database. The application stores data in JSON format and includes validation, logging, and a clean modular architecture.
 
 ---
 
 🚀 Features
 
-🎲 Movie Recommendations
-
-- Random movie recommendations
-- Genre-based recommendations
-- Dynamic genre selection
-
-➕ Add Movies
-
-- Add movies to existing genres
-- Create entirely new genres
-- Automatic JSON persistence
-
-🔍 Search Movies
-
-- Search movies by title
-- Case-insensitive search
-
-🗑 Delete Movies
-
-- Delete movies safely
-- Confirmation before deletion
-
-📋 Show Movies
-
-- Display all available genres
-- Display all movies within each genre
-- Movie counting per genre
-
-💾 Data Persistence
-
-- Automatic JSON storage
-- Data remains after application restart
-
-📝 Logging System
-
-- Console logging
-- File logging
-- Error tracking
-- Critical failure tracking
-
-⚠️ Error Handling
-
-- Missing JSON files
-- Corrupted JSON files
-- File I/O errors
-- Unexpected exceptions
-- KeyboardInterrupt support
-
----
-
-🛠 Technologies Used
-
-- Python 3
-- JSON
-- Logging
-- Random Module
-- Dictionaries
-- Lists
-- Functions
-- Loops
-- Exception Handling
-- File Handling
+- 🎲 Random movie recommendations by genre
+- ➕ Add new movies
+- 🔍 Search for movies
+- ❌ Delete existing movies
+- 📋 Display all movies by category
+- 💾 Persistent JSON storage
+- ✅ Input validation
+- 📝 Logging system for debugging and monitoring
+- 🏗️ Modular project architecture
 
 ---
 
@@ -79,162 +24,168 @@ The project was created as part of a Python learning journey focused on real-wor
 
 movie_recommender/
 │
-├── movie_recommender.py
-├── movies.json
-├── movies_app.log
+├── main.py               # Application entry point
+├── movie_service.py      # Core business logic
+├── storage.py            # JSON file handling
+├── validators.py         # Input validation functions
+├── logger_config.py      # Logging configuration
+├── config.py             # Project configuration constants
+├── movies.json           # Movie database
+├── movies_app.log        # Log file
 └── README.md
 
 ---
 
-📦 Movie Database Structure
+🏛️ Architecture
 
-Movies are stored inside a JSON file using the following format:
+The project follows a modular design where each file has a single responsibility:
 
-{
-    "action": [
-        "John Wick",
-        "Extraction"
-    ],
-    "comedy": [
-        "Mr Bean",
-        "Home Alone"
-    ]
-}
+config.py
+
+Stores project-wide constants such as:
+
+- JSON file name
+- Log file name
+- Logger name
+
+logger_config.py
+
+Creates and configures the application logger.
+
+storage.py
+
+Handles:
+
+- Loading movie data
+- Saving movie data
+- Creating default movie collections
+
+validators.py
+
+Responsible for:
+
+- Movie name validation
+- Genre validation
+- Duplicate movie detection
+- Duplicate genre detection
+
+movie_service.py
+
+Contains the application's business logic:
+
+- Recommend movies
+- Add movies
+- Search movies
+- Delete movies
+- Display movies
+
+main.py
+
+Acts as the application's entry point and menu controller.
 
 ---
 
-🎯 Available Genres
+⚙️ Installation
 
-Default genres include:
+Clone the repository:
 
-- Action
-- Comedy
-- Horror
-- Drama
-- Sci-Fi
+git clone https://github.com/Behruz-Hojaniyazow/python-learning-journey.git
 
-Users can also create their own genres.
+cd python-learning-journey
 
----
+Run the application:
 
-📋 Menu Options
-
-1 -> Recommend Movie
-2 -> Add Movie
-3 -> Search Movie
-4 -> Delete Movie
-5 -> Show Movies
-6 -> Exit App
+python main.py
 
 ---
 
-🔒 Validation Rules
+📖 Usage
 
-Genre Validation
+After launching the application, choose one of the available menu options:
 
-- Genre name cannot be empty
-- Duplicate genres are not allowed
-
-Movie Validation
-
-- Movie title cannot be empty
-- Duplicate movies are not allowed
+1. Recommend Movie
+2. Add Movie
+3. Search Movie
+4. Delete Movie
+5. Show Movies
+6. Exit
 
 ---
 
 📝 Logging
 
-The application uses Python's logging module.
+The application uses Python's built-in logging module.
 
-Log Levels
-
-- DEBUG
-- INFO
-- WARNING
-- ERROR
-- CRITICAL
-
-Log File
+Logs are written to:
 
 movies_app.log
 
-Logged Events
+The logger records:
 
-- Movie recommendations
-- Movie additions
-- Movie deletions
-- Search operations
-- Invalid user input
-- JSON errors
-- Critical system failures
+- Application events
+- Warnings
+- Errors
+- Unexpected exceptions
 
 ---
 
-⚠️ Error Recovery
+💾 Data Storage
 
-The application safely handles:
+Movies are stored in:
 
-- Missing JSON files
-- Invalid JSON structure
-- File access errors
-- Unexpected runtime errors
-- User interruption (Ctrl + C)
+movies.json
 
----
+Example structure:
 
-▶️ How To Run
-
-python movie_recommender.py
-
----
-
-📸 Example
-
-===================================
-Welcome to Kryos Movie Program
-===================================
-
-1 -> Recommend Movie
-2 -> Add Movie
-3 -> Search Movie
-4 -> Delete Movie
-5 -> Show Movies
-6 -> Exit App
+{
+  "Action": [
+    "John Wick",
+    "Mad Max"
+  ],
+  "Comedy": [
+    "The Mask",
+    "Superbad"
+  ]
+}
 
 ---
 
-📚 Concepts Practiced
+🛠️ Technologies Used
 
-This project demonstrates:
-
-- CRUD Operations
-- JSON Storage
-- Logging
-- Exception Handling
-- Random Selection
-- Data Validation
-- Clean Functions
-- Persistent Storage
-- Command Line Applications
+- Python 3
+- JSON
+- Logging Module
+- Modular Programming Principles
 
 ---
 
-🔮 Future Improvements
+🎯 Learning Goals
 
-- Update/Edit Movies
-- Favorites System
-- Movie Ratings
-- Watch History
-- SQLite Database Integration
-- OOP Refactor
-- Unit Testing
-- Search by Genre
-- Export Movie Lists
+This project was originally built as a single-file application and later refactored into a modular architecture to improve:
+
+- Maintainability
+- Readability
+- Scalability
+- Separation of concerns
+- Code organization
 
 ---
 
-👨‍💻 Author
+📈 Future Improvements
+
+- Type hints
+- Unit testing with pytest
+- Object-oriented architecture
+- Database integration (SQLite/PostgreSQL)
+- GUI version
+- Web version using Flask or Django
+
+---
+
+## 👨‍💻 Author
 
 Behruz
 
-Built as part of a Python programming learning journey focused on creating practical projects and improving software development skills.
+- Python Developer
+- Learning Software Engineering
+- Building projects with Python
