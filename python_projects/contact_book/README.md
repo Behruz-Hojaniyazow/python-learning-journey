@@ -1,40 +1,23 @@
 📖 KRYOS Contact Book
 
-A simple yet powerful command-line Contact Book application built with Python.
+A modular command-line Contact Book application built with Python.
 
-This project allows users to manage contacts efficiently using a JSON-based storage system. It includes contact creation, searching, deletion, data persistence, logging, validation, error handling, and graceful application shutdown.
-
----
-
-🚀 Features
-
-- ➕ Add new contacts
-- 📋 Display all contacts
-- 🔍 Search contacts by name
-- 🗑️ Delete contacts
-- 💾 Automatic JSON data storage
-- 🚫 Duplicate contact prevention
-- 🚫 Duplicate phone number prevention
-- ☎️ International phone number validation ("+998901234567")
-- 🔤 Alphabetical contact sorting
-- 📝 Logging system
-- ⚠️ Error handling and recovery
-- 🛑 Graceful application shutdown
-- 📂 Persistent data storage
+This project allows users to store, search, display, and delete contacts while persisting data in a JSON file. The application follows a modular architecture with separate modules for business logic, storage, validation, configuration, and logging.
 
 ---
 
-🛠 Technologies Used
+✨ Features
 
-- Python 3
-- JSON
-- Logging Module
-- File Handling
-- Functions
-- Loops
-- Dictionaries
-- Lists
-- Exception Handling
+- Add new contacts
+- Display all contacts
+- Search contacts by name
+- Delete contacts
+- Prevent duplicate contact names
+- Prevent duplicate phone numbers
+- Validate user input
+- Persistent JSON storage
+- Professional logging system
+- Modular and maintainable code structure
 
 ---
 
@@ -42,164 +25,191 @@ This project allows users to manage contacts efficiently using a JSON-based stor
 
 contact_book/
 │
-├── contact_book.py
+├── config.py
+├── contact_service.py
+├── logger_config.py
+├── main.py
+├── storage.py
+├── validators.py
 ├── contacts_info.json
 ├── app.log
 └── README.md
 
+Module Overview
+
+"main.py"
+
+Application entry point.
+
+Responsibilities:
+
+- Display menu
+- Handle user choices
+- Route actions to service functions
+- Handle global exceptions
+
 ---
 
-📌 Contact Data Structure
+"contact_service.py"
 
-Each contact is stored as a dictionary:
+Contains the application's core business logic.
 
-{
-    "name": "John Doe",
-    "phone": "+998901234567"
-}
+Responsibilities:
 
-All contacts are stored inside a JSON file.
+- Add contacts
+- Show contacts
+- Search contacts
+- Delete contacts
+- Exit application
 
 ---
 
-🔒 Validation Rules
+"storage.py"
+
+Handles data persistence.
+
+Responsibilities:
+
+- Load contacts from JSON
+- Save contacts to JSON
+- Handle storage-related exceptions
+
+---
+
+"validators.py"
+
+Contains input validation logic.
+
+Responsibilities:
+
+- Validate contact names
+- Validate phone numbers
+- Return validation results and error messages
+
+---
+
+"logger_config.py"
+
+Configures the logging system.
+
+Responsibilities:
+
+- Create logger instance
+- Configure file handler
+- Configure console handler
+- Apply logging formatters
+
+---
+
+"config.py"
+
+Stores application-wide constants.
+
+Responsibilities:
+
+- JSON file configuration
+- Log file configuration
+- Logger configuration
+
+---
+
+📝 Contact Data Format
+
+Contacts are stored inside:
+
+contacts_info.json
+
+Example:
+
+[
+    {
+        "name": "John",
+        "phone": "+1234567890"
+    },
+    {
+        "name": "Alice",
+        "phone": "+998901234567"
+    }
+]
+
+---
+
+📊 Logging
+
+The application uses Python's built-in logging module.
+
+Console logs:
+
+INFO: New contact was saved successfully
+WARNING: Contact creation failed
+
+File logs ("app.log"):
+
+[2025-08-24 15:00:00] ERROR [ContactBook:storage.py:42] Invalid JSON format
+
+---
+
+🚀 How to Run
+
+Navigate to the project directory:
+
+cd contact_book
+
+Run the application:
+
+python main.py
+
+---
+
+🛡 Validation Rules
 
 Name Validation
 
-- Name cannot be empty.
+- Cannot be empty
 
-Phone Number Validation
+Phone Validation
 
+- Cannot be empty
 - Must start with "+"
-- Must contain only digits after "+"
-- Must be longer than 8 characters
-- Duplicate phone numbers are not allowed
+- Must contain digits only after "+"
+- Must be longer than 8 digits
 
 Examples:
 
 ✅ Valid
 
 +998901234567
-+447123456789
-+12025550123
 
 ❌ Invalid
 
 998901234567
-+99890abc123
++99890ABC123
 +123
 
 ---
 
-📋 Menu Options
+🔧 Technologies Used
 
-1 -> Add Contact
-2 -> Show Contacts
-3 -> Search Contacts
-4 -> Delete Contact
-5 -> Exit App
-
----
-
-📝 Logging System
-
-The application uses Python's logging module.
-
-Log Levels
-
-- DEBUG
-- INFO
-- WARNING
-- ERROR
-- CRITICAL
-
-Logged Events
-
-- Contact creation
-- Contact deletion
-- Search operations
-- Invalid user input
-- JSON errors
-- File errors
-- Critical system failures
-
-Log records are automatically written to:
-
-app.log
-
----
-
-⚠️ Error Handling
-
-The application safely handles:
-
-- Missing JSON files
-- Invalid JSON format
-- File I/O errors
-- Unexpected exceptions
-- KeyboardInterrupt ("Ctrl + C")
-
-This prevents the program from crashing unexpectedly.
-
----
-
-💾 Data Persistence
-
-Contacts are automatically saved after:
-
-- Adding a contact
-- Deleting a contact
-
-Data remains available after restarting the application.
-
----
-
-🎯 Learning Objectives
-
-This project was built to practice:
-
-- Functions
-- JSON handling
-- File operations
-- Logging
-- Exception handling
-- CRUD operations
-- Data validation
-- Python project structure
-- Clean code principles
-
----
-
-▶️ How To Run
-
-python contact_book.py
-
----
-
-📸 Example
-
-========================================
-Welcome to KRYOS Contact Book!
-----------------------------------------
-1 -> Add Contact
-2 -> Show Contacts
-3 -> Search Contacts
-4 -> Delete Contact
-5 -> Exit App
-========================================
+- Python 3
+- JSON
+- Logging Module
+- File Handling
+- Modular Programming
 
 ---
 
 📈 Future Improvements
 
-- Update/Edit Contact
-- Export Contacts
-- Import Contacts
-- Contact Categories
-- Favorites System
-- SQLite Database Support
-- Object-Oriented Refactor (OOP)
-- Unit Testing
+Possible future enhancements:
+
+- Update contact information
+- Export contacts to CSV
+- Import contacts from CSV
+- Contact categories
+- Favorite contacts
+- Pagination for large contact lists
+- Unit testing
+- Search by phone number
 
 ---
 
@@ -207,10 +217,10 @@ Welcome to KRYOS Contact Book!
 
 Behruz
 
-Built as part of a Python learning journey focused on writing real-world projects and improving software development skills.
+Aspiring Python Developer focused on writing clean, modular, and maintainable code.
 
 ---
 
-# 📜 License
+📄 License
 
 This project is open-source and available for learning and educational purposes.
