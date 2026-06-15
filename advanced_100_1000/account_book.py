@@ -10,7 +10,7 @@ def get_number(prompt):
       print("❌️ Error: Please enter only numbers")
       
 def math_result():
-  number = get_numbers("Enter a number: ")
+  number = get_number("Enter a number: ")
   
   # 1. math.pow(x, y) - y-power of x
   degree = math.pow(number, 2)
