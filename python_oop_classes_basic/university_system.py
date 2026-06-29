@@ -9,6 +9,7 @@ class UniversitySystem:
         
         # We increment the class variable directly by the class name
         UniversitySystem.total_students += 1
+        
 # --- System Testing ---    
 if __name__ == "__main__":
     
