@@ -1,56 +1,120 @@
-def parse_input(value):
-    """Converts text to int or float whenever possible, leaves it as text if not possible."""
-    
-    if value.isdigit():
-        return int(value)
-    
-    try:
-        return float(value)
-    except ValueError:
-        return value
+class DatabaseManager:
+    """
+    A class to manage a dynamic database supporting mixed data types.
 
-def add_item(db, item):
-    """Adds an element to the database."""
-    db.append(item)
-    
-def remove_item(db, item):
-    """
-    Deletes an element and returns a status code:
-    - "EMPTY": If the database is empty
-    - "SUCCESS": If the element was found and deleted successfully
-    - "NOT_FOUND": If the element was not found in the database
+    This class provides robust mechanisms to add, remove, and display elements
+    consisting of integers, floats, and strings, while handling case-insensitivity
+    and type conversion safely.
     """
     
-    if not db:
-        return "EMPTY"
+    def __init__(self, db):
+        """Initializes the DatabaseManager with a reference to a database list.
+
+        Args:
+            db (list): The underlying list acting as the database storage.
+        """
+        self.db = db
         
-    initial_length = len(db)
-    item_lower = item.lower()
-    
-    db[:] = [
-        x for x in db
-        if not (isinstance(x, str) and x.lower() == item_lower) and str(x) != item
-    ]
+    @staticmethod
+    def parse_input(value):
+        """
+        Converts string input to its appropriate numeric type if possible.
+
+        Args:
+            value (str): The raw string input from the user.
+
+        Returns:
+            int | float | str: The converted typed value or original string.
+        """
         
-    if len(db) < initial_length:
-        return "SUCCESS"
-    return "NOT_FOUND"
-    
-def show_items(db):
-    """
-    Returns the elements of the base.
-    Returns a tuple of the form (State, Result).
-    """
-    
-    if not db:
-        return "EMPTY", ""
+        if value.isdigit():
+            return int(value)
         
-    formatted_list = [x.title() if isinstance(x, str) else x for x in db]
+        try:
+            return float(value)
+        except ValueError:
+            return value
     
-    return "SUCCESS", ", ".join(map(str, formatted_list))
+    def _format_item(self, item):
+        """Formats the element for uniform display and presentation.
+
+        Capitalizes strings using title-case and leaves numeric types untouched.
+
+        Args:
+            item (Any): The database item to be formatted.
+
+        Returns:
+            Any: The formatted title-case string or the original numeric item.
+        """
+        
+        clean_item = item.title() if isinstance(item, str) else item
+        return clean_item
+        
+    def add_item(self, item):
+        """
+        Appends an element to the database and returns a success message.
+
+        Args:
+            item (Any): The element (int, float, or str) to add.
+
+        Returns:
+            str: A formatted user-friendly success message.
+        """
+        self.db.append(item)
+        display_element = self._format_item(item)
+        
+        return f"\n✅️ '{display_element}' added successfully"
+        
+    def remove_item(self, item):
+        """
+        Removes all matching instances of an element from the database.
+
+        Handles case-insensitive comparisons for strings and securely matches
+        string representations of numeric types.
+
+        Args:
+            item (str): The raw string identifier of the element to delete.
+
+        Returns:
+            str: A status message indicating success, failure, or an empty database.
+        """
+        
+        if not self.db:
+            return "\n⚠️ Database is empty, First add elements"
+        
+        display_element = self._format_item(item)    
+        initial_length = len(self.db)
+        item_lower = item.lower()
+        
+        self.db[:] = [
+            x for x in self.db
+            if not (isinstance(x, str) and x.lower() == item_lower) and str(x) != item
+        ]
+            
+        if len(self.db) < initial_length:
+            return f"✅️ '{display_element}' deleted successfully!"
+        return f"\n❌️ Deleting failed: '{display_element}' element not found"
+        
+    def show_items(self):
+        """
+        Returns the elements of the base.
+        Returns a tuple of the form (State, Result).
+        """
+        
+        if not self.db:
+            return "\n⚠️ Database is empty, First add elements"
+            
+        formatted_list = [self._format_item(x) for x in self.db]
+        result = "\n=== ELEMENTS IN THE BASE ===\n"
+        for index, element in enumerate(formatted_list, start=1):
+            result += f"{index}. {element}\n"
+        result += "=" * 30
+        
+        return result
     
 def main():
     elements = []
+    database = DatabaseManager(elements)
     
     menu_actions = {
         "1" : "add item",
@@ -83,11 +147,10 @@ def main():
                     break
                 
                 if raw_element:
-                    user_element = parse_input(raw_element)
-                    add_item(elements, user_element)
+                    user_element = DatabaseManager.parse_input(raw_element)
+                    result = database.add_item(user_element)
                     
-                    display_element = user_element.title() if isinstance(user_element, str) else user_element
-                    print(f"✅️ '{display_element}' element added successfully")
+                    print(result)
                 
                 else:
                     print("\n❌️ Element name cannot be empty")
@@ -101,24 +164,12 @@ def main():
                     print("\nDeleting elements stopped")
                     break
                 
-                status = remove_item(elements, user_element)
                 
-                if status == "EMPTY":
-                    print("\n⚠️ Database is empty, First add elements")
-                    break
-                elif status == "NOT_FOUND":
-                    print(f"\n❌️ Deleting failed: '{user_element.title()}' element not found")
-                elif status == "SUCCESS":
-                    print(f"✅️ '{user_element.title()}' deleted successfully!")
+                status = database.remove_item(user_element)
+                print(status)
             
         elif user_choice == "3":
-            status, result = show_items(elements)
-            
-            if status == "EMPTY":
-                print("\n⚠️ Database is empty, First add elements")
-            else:
-                print("\nThese are the elements which you have collected")
-                print(result)
+            print(database.show_items())
             
         else:
             print("\n⚠️ Invalid choice, Please enter only (1/2/3) or stop")
