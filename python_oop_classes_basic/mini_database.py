@@ -7,13 +7,9 @@ class DatabaseManager:
     and type conversion safely.
     """
     
-    def __init__(self, db):
-        """Initializes the DatabaseManager with a reference to a database list.
-
-        Args:
-            db (list): The underlying list acting as the database storage.
-        """
-        self.db = db
+    def __init__(self):
+        """Initializes the DatabaseManager with its own internal database list."""
+        self.db = []
         
     @staticmethod
     def parse_input(value):
@@ -27,15 +23,21 @@ class DatabaseManager:
             int | float | str: The converted typed value or original string.
         """
         
-        if value.isdigit():
+        if not isinstance(value, str):
+            return value
+        
+        try:
             return int(value)
+        except ValueError:
+            pass
         
         try:
             return float(value)
         except ValueError:
             return value
     
-    def _format_item(self, item):
+    @staticmethod
+    def format_item(item):
         """Formats the element for uniform display and presentation.
 
         Capitalizes strings using title-case and leaves numeric types untouched.
@@ -51,70 +53,43 @@ class DatabaseManager:
         return clean_item
         
     def add_item(self, item):
-        """
-        Appends an element to the database and returns a success message.
-
-        Args:
-            item (Any): The element (int, float, or str) to add.
-
-        Returns:
-            str: A formatted user-friendly success message.
-        """
+        """Appends an element to the database. Returns True when done."""
         self.db.append(item)
-        display_element = self._format_item(item)
-        
-        return f"\n✅️ '{display_element}' added successfully"
+        return True
         
     def remove_item(self, item):
         """
-        Removes all matching instances of an element from the database.
-
-        Handles case-insensitive comparisons for strings and securely matches
-        string representations of numeric types.
-
-        Args:
-            item (str): The raw string identifier of the element to delete.
-
+        Removes element from the database.
         Returns:
-            str: A status message indicating success, failure, or an empty database.
+            str: "EMPTY", "SUCCESS", or "NOT_FOUND"
         """
         
         if not self.db:
-            return "\n⚠️ Database is empty, First add elements"
-        
-        display_element = self._format_item(item)    
+            return "EMPTY"
+                                
         initial_length = len(self.db)
-        item_lower = item.lower()
+        parsed_item = DatabaseManager.parse_input(item)
+        item_lower = item.lower() if isinstance(parsed_item, str) else None
         
         self.db[:] = [
             x for x in self.db
-            if not (isinstance(x, str) and x.lower() == item_lower) and str(x) != item
+            if not (
+                (isinstance(x, str) and x.lower() == item_lower) or 
+                (not isinstance(x, str) and x == parsed_item)
+                )
         ]
             
         if len(self.db) < initial_length:
-            return f"✅️ '{display_element}' deleted successfully!"
-        return f"\n❌️ Deleting failed: '{display_element}' element not found"
+            return "SUCCESS"
+        return "NOT_FOUND"
         
-    def show_items(self):
-        """
-        Returns the elements of the base.
-        Returns a tuple of the form (State, Result).
-        """
+    def get_items(self):
+        """Returns the raw formatted list of items. (No UI formatting)"""
         
-        if not self.db:
-            return "\n⚠️ Database is empty, First add elements"
-            
-        formatted_list = [self._format_item(x) for x in self.db]
-        result = "\n=== ELEMENTS IN THE BASE ===\n"
-        for index, element in enumerate(formatted_list, start=1):
-            result += f"{index}. {element}\n"
-        result += "=" * 30
-        
-        return result
+        return [DatabaseManager.format_item(x) for x in self.db]
     
 def main():
-    elements = []
-    database = DatabaseManager(elements)
+    database = DatabaseManager()
     
     menu_actions = {
         "1" : "add item",
@@ -148,9 +123,9 @@ def main():
                 
                 if raw_element:
                     user_element = DatabaseManager.parse_input(raw_element)
-                    result = database.add_item(user_element)
-                    
-                    print(result)
+                    database.add_item(user_element)
+                    display_element = DatabaseManager.format_item(user_element)
+                    print(f"\n✅️ '{display_element}' added successfully")
                 
                 else:
                     print("\n❌️ Element name cannot be empty")
@@ -164,12 +139,27 @@ def main():
                     print("\nDeleting elements stopped")
                     break
                 
-                
                 status = database.remove_item(user_element)
-                print(status)
+                display_element = DatabaseManager.format_item(user_element)
+                
+                if status == "SUCCESS":
+                    print(f"\n✅️ '{display_element}' deleted successfully")
+                elif status == "EMPTY":
+                    print("\n⚠️ Database is empty, First add elements")
+                    break
+                elif status == "NOT_FOUND":
+                    print(f"\n❌️ Deleting failed: '{display_element}' element not found")
             
         elif user_choice == "3":
-            print(database.show_items())
+            elements = database.get_items()
+            
+            if not elements:
+                print("\n⚠️ Database is empty, First add elements")
+            else:
+                print("\n=== ELEMENTS IN THE BASE ===")
+                for index, element in enumerate(elements, start=1):
+                    print(f"{index}. {element}")
+                print("-" * 30)
             
         else:
             print("\n⚠️ Invalid choice, Please enter only (1/2/3) or stop")
