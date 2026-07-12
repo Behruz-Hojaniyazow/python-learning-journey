@@ -1,226 +1,199 @@
-📖 KRYOS Contact Book
+# 📇 KRYOS Contact Book Manager
 
-A modular command-line Contact Book application built with Python.
-
-This project allows users to store, search, display, and delete contacts while persisting data in a JSON file. The application follows a modular architecture with separate modules for business logic, storage, validation, configuration, and logging.
+A clean, console-based **Contact Book** application written in Python. It follows a layered architecture (UI → Service → Storage) with centralized logging, input validation, and persistent JSON storage — making it easy to maintain, test, and extend.
 
 ---
 
-✨ Features
+## ✨ Features
 
-- Add new contacts
-- Display all contacts
-- Search contacts by name
-- Delete contacts
-- Prevent duplicate contact names
-- Prevent duplicate phone numbers
-- Validate user input
-- Persistent JSON storage
-- Professional logging system
-- Modular and maintainable code structure
+- ➕ **Add contacts** with name and phone number validation
+- 📋 **List all contacts**, sorted alphabetically by name
+- 🔍 **Search contacts** by partial or full name match
+- 🗑️ **Delete contacts**, with confirmation and disambiguation when multiple matches are found
+- 🧠 **Duplicate detection** for both names and phone numbers
+- 💾 **Persistent storage** in a human-readable JSON file
+- 🪵 **Structured logging** to both console and file (`app.log`)
+- 🛡️ **Graceful error handling**, including safe shutdown on `Ctrl+C`
 
 ---
 
-📂 Project Structure
+## 🗂️ Project Structure
 
+```
 contact_book/
 │
-├── config.py
-├── contact_service.py
-├── logger_config.py
-├── main.py
-├── storage.py
-├── validators.py
-├── contacts_info.json
-├── app.log
+├── main.py              # Entry point — CLI menu and user interaction
+├── contact_service.py   # Business logic layer (ContactService, ContactStatus)
+├── storage.py           # Data persistence layer (JSONContactStorage)
+├── validators.py        # Input validation logic (InputValidator)
+├── logger_config.py     # Centralized logger configuration
+├── config.py            # Application-wide constants
+│
+├── contacts_info.json   # Auto-generated data file (contact storage)
+├── app.log              # Auto-generated log file
 └── README.md
-
-Module Overview
-
-"main.py"
-
-Application entry point.
-
-Responsibilities:
-
-- Display menu
-- Handle user choices
-- Route actions to service functions
-- Handle global exceptions
+```
 
 ---
 
-"contact_service.py"
+## 🏗️ Architecture
 
-Contains the application's core business logic.
+The project follows a simple **separation of concerns** design:
 
-Responsibilities:
+```
+┌─────────────┐      ┌──────────────────┐      ┌────────────────────┐
+│   main.py   │ ───► │ contact_service.py│ ───► │     storage.py     │
+│ (UI / CLI)  │      │ (business logic)  │      │ (JSON persistence) │
+└─────────────┘      └──────────────────┘      └────────────────────┘
+                              │
+                              ▼
+                       ┌──────────────┐
+                       │ validators.py│
+                       └──────────────┘
 
-- Add contacts
-- Show contacts
-- Search contacts
-- Delete contacts
-- Exit application
+              All layers share a common logger from logger_config.py
+```
 
----
-
-"storage.py"
-
-Handles data persistence.
-
-Responsibilities:
-
-- Load contacts from JSON
-- Save contacts to JSON
-- Handle storage-related exceptions
-
----
-
-"validators.py"
-
-Contains input validation logic.
-
-Responsibilities:
-
-- Validate contact names
-- Validate phone numbers
-- Return validation results and error messages
+- **`main.py`** never touches the JSON file directly — it only calls `ContactService` methods and reacts to the returned `ContactStatus`.
+- **`ContactService`** contains all business rules (validation, duplicate checks, status reporting) and delegates raw read/write operations to `JSONContactStorage`.
+- **`JSONContactStorage`** is solely responsible for reading and writing `contacts_info.json`, with robust exception handling.
+- **`InputValidator`** provides static, reusable validation methods with no side effects.
+- **`logger_config.py`** exposes a single `get_logger()` function so every module logs through the same configured logger instance.
 
 ---
 
-"logger_config.py"
+## ⚙️ Requirements
 
-Configures the logging system.
-
-Responsibilities:
-
-- Create logger instance
-- Configure file handler
-- Configure console handler
-- Apply logging formatters
+- Python **3.8+** (uses `enum.auto`, f-strings, and type hints)
+- No external dependencies — the project relies only on the Python standard library (`json`, `logging`, `enum`, `sys`)
 
 ---
 
-"config.py"
+## 🚀 Installation & Usage
 
-Stores application-wide constants.
+1. Clone or download the project folder:
 
-Responsibilities:
+   ```bash
+   git clone https://github.com/Behruz-Hojaniyazow/python-learning-journey.git
+   cd python-learning-journey/python_projects/contact_book
+   ```
 
-- JSON file configuration
-- Log file configuration
-- Logger configuration
+2. Run the application:
+   ```bash
+   python main.py
+   ```
+
+3. Use the on-screen menu to navigate:
+   ```
+   ========================================
+      Welcome to KRYOS Contact Book!
+   ----------------------------------------
+   1 -> Add Contact
+   2 -> Show Contacts
+   3 -> Search Contacts
+   4 -> Delete Contacts
+   5 -> Exit app
+   ========================================
+
+   Choose an action:
+   ```
+
+4. Type `stop` at any prompt (Add / Search / Delete) to return to the main menu.
 
 ---
 
-📝 Contact Data Format
+## 📱 Phone Number Rules
 
-Contacts are stored inside:
+A phone number is considered valid only if it meets **all** of the following:
 
-contacts_info.json
+| Rule | Example (valid) | Example (invalid) |
+|------|------------------|--------------------|
+| Must not be empty | `+998901234567` | *(empty string)* |
+| Must start with `+` | `+998901234567` | `998901234567` |
+| Only digits allowed after `+` | `+998901234567` | `+99890abc4567` |
+| Must be **longer than 8 characters** (including `+`) | `+998901234567` | `+1234567` |
 
-Example:
+---
 
+## 💾 Data Storage Format
+
+Contacts are stored in `contacts_info.json` as a list of objects:
+
+```json
 [
     {
-        "name": "John",
-        "phone": "+1234567890"
+        "name": "John Doe",
+        "phone": "+998901234567"
     },
     {
-        "name": "Alice",
-        "phone": "+998901234567"
+        "name": "Jane Smith",
+        "phone": "+15551234567"
     }
 ]
+```
+
+- The file is created automatically on the first successful `save_contacts()` call.
+- If the file doesn't exist yet, `load_contacts()` safely returns an empty list instead of raising an error.
+- If the JSON file becomes corrupted, the error is logged at `ERROR` level and an empty list is returned instead of crashing the app.
 
 ---
 
-📊 Logging
+## 🪵 Logging
 
-The application uses Python's built-in logging module.
+Logging is centralized through `logger_config.get_logger()` and writes to **two destinations**:
 
-Console logs:
+| Handler | Level | Destination | Purpose |
+|---------|-------|-------------|---------|
+| Console Handler | `INFO` and above | Terminal | Real-time feedback for the user/developer |
+| File Handler | `ERROR` and above | `app.log` | Persistent record of errors and critical failures for later analysis |
 
-INFO: New contact was saved successfully
-WARNING: Contact creation failed
-
-File logs ("app.log"):
-
-[2025-08-24 15:00:00] ERROR [ContactBook:storage.py:42] Invalid JSON format
-
----
-
-🚀 How to Run
-
-Navigate to the project directory:
-
-cd contact_book
-
-Run the application:
-
-python main.py
+Log format used in `app.log`:
+```
+[2026-07-12 14:32:10,123] ERROR [ContactBook:storage.py:60] - File error - [Errno 13] Permission denied
+```
 
 ---
 
-🛡 Validation Rules
+## 🧾 Status Codes (`ContactStatus`)
 
-Name Validation
+All service-layer methods return a `ContactStatus` enum value so the UI layer can react appropriately without parsing strings:
 
-- Cannot be empty
-
-Phone Validation
-
-- Cannot be empty
-- Must start with "+"
-- Must contain digits only after "+"
-- Must be longer than 8 digits
-
-Examples:
-
-✅ Valid
-
-+998901234567
-
-❌ Invalid
-
-998901234567
-+99890ABC123
-+123
+| Status | Meaning |
+|--------|---------|
+| `SUCCESS` | Operation completed successfully |
+| `EMPTY_NAME` | Name field was left blank |
+| `DUPLICATE_NAME` | A contact with this name already exists |
+| `DUPLICATE_PHONE` | A contact with this phone number already exists |
+| `INVALID_PHONE` | Phone number failed validation rules |
+| `SAVE_ERROR` | Failed to write data to the storage file |
+| `NOT_FOUND` | No matching contact was found (search/delete) |
 
 ---
 
-🔧 Technologies Used
+## 🛡️ Error Handling
 
-- Python 3
-- JSON
-- Logging Module
-- File Handling
-- Modular Programming
+- **`KeyboardInterrupt` (Ctrl+C):** The application exits gracefully with a friendly message instead of printing a traceback.
+- **Unexpected exceptions:** Caught at the top level in `main()`, logged as `CRITICAL` with full traceback (`exc_info=True`), and the user is shown a generic, non-technical error message before the app exits.
+- **File I/O errors:** Handled explicitly in `storage.py` (`FileNotFoundError`, `json.JSONDecodeError`, `IOError`), each logged with appropriate context.
 
 ---
 
-📈 Future Improvements
+## 🗺️ Roadmap Ideas
 
-Possible future enhancements:
-
-- Update contact information
-- Export contacts to CSV
-- Import contacts from CSV
-- Contact categories
-- Favorite contacts
-- Pagination for large contact lists
-- Unit testing
-- Search by phone number
+- [ ] Add contact editing (update name/phone of an existing contact)
+- [ ] Export/import contacts to/from CSV
+- [ ] Add unit tests for `validators.py` and `contact_service.py`
+- [ ] Support multiple phone numbers per contact
+- [ ] Add a configuration option to change log level via `config.py`
 
 ---
 
-👨‍💻 Author
+## 📄 License
 
-Behruz
-
-Aspiring Python Developer focused on writing clean, modular, and maintainable code.
+This project is licensed under the MIT License.
 
 ---
 
-📄 License
+## 👤 Author
 
-This project is open-source and available for learning and educational purposes.
+**KRYOS Contact Book Manager** — built with a focus on clean architecture, robust validation, and reliable logging.
