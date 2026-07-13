@@ -1,3 +1,14 @@
+"""
+Logging configuration for the Contact Book application.
+
+This module creates and configures the application's central
+logger with both file and console handlers.
+
+The logger records important application events, warnings,
+errors, and critical exceptions, providing reliable diagnostics
+for debugging and maintenance.
+"""
+
 import logging
 from config import (
   LOG_FILE,
@@ -5,9 +16,43 @@ from config import (
 )
 
 def get_logger():
-    """Create and return a configured logger instance."""
+    """
+    Create, configure, and return the application's logger instance.
 
-    # creating a log
+    This function initializes the project's central logger and
+    configures two logging handlers:
+
+    1. A file handler that records only ERROR and CRITICAL log
+       messages for long-term storage and debugging purposes.
+
+    2. A console handler that displays INFO and higher-level log
+       messages to provide real-time feedback during program
+       execution.
+
+    The logger is configured only once. If handlers have already
+    been attached, the existing logger instance is returned to
+    prevent duplicate log entries caused by multiple handlers.
+
+    Logging Configuration:
+        - Logger Level:
+            DEBUG
+
+        - File Handler:
+            Records ERROR and CRITICAL messages.
+
+        - Console Handler:
+            Displays INFO, WARNING, ERROR, and CRITICAL messages.
+
+        - Log File Encoding:
+            UTF-8
+
+    Returns:
+        logging.Logger:
+            A fully configured logger instance ready for use
+            throughout the application.
+    """
+
+    # Create the application's logger instance.
     logger = logging.getLogger(LOGGER_NAME)
     logger.setLevel(logging.DEBUG) # Accepts logs of all levels
   

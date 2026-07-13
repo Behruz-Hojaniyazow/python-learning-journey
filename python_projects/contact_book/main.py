@@ -1,3 +1,14 @@
+"""
+Entry point for the Contact Book application.
+
+This module provides the command-line user interface, handles
+user interaction, displays the application menu, and delegates
+operations to the ContactService.
+
+It also manages application startup, graceful shutdown, and
+global exception handling.
+"""
+
 import sys
 from contact_service import ContactService, ContactStatus
 from logger_config import get_logger
@@ -7,6 +18,20 @@ logger = get_logger()
 contacts = ContactService()
 
 def ui_add_contact():
+    """
+    Display the user interface for creating new contacts.
+
+    This function continuously prompts the user to enter contact
+    information until the user chooses to stop. Each contact is
+    validated and processed through the ContactService.
+
+    Appropriate success messages and validation errors are displayed
+    based on the returned ContactStatus values.
+
+    Returns:
+        None
+    """
+    
     print("\n--- 🗂 Adding Contacts 🗂 ---")
     while True:
         print("\nType 'stop' to stop adding contacts")
@@ -37,6 +62,18 @@ def ui_add_contact():
             print(f"\nContact saved successfully: Name {name.title()} | Phone number {phone_num}")
 
 def ui_search_contact():
+    """
+    Display the user interface for searching contacts.
+
+    Allows the user to search for contacts using a full or partial
+    name. Matching contacts are displayed in a readable format,
+    while appropriate messages are shown when no matches are found
+    or the search input is invalid.
+
+    Returns:
+        None
+    """
+    
     print("\n--- 🔍 Searching Contact 🔎 ---")
     
     if not contacts.get_contacts():
@@ -68,6 +105,18 @@ def ui_search_contact():
                 print("-" * 40)
 
 def ui_show_contacts():
+    """
+    Display all stored contacts in alphabetical order.
+
+    Retrieves every saved contact from the storage, sorts the
+    collection alphabetically by name, and presents the data in
+    a formatted table. If no contacts exist, an informative
+    message is displayed.
+
+    Returns:
+        None
+    """
+    
     all_contacts = contacts.get_contacts()
     
     if not all_contacts:
@@ -88,6 +137,22 @@ def ui_show_contacts():
     print("=" * 43)
     
 def ui_delete_contact():
+    """
+    Display the user interface for deleting contacts.
+
+    Allows the user to search for existing contacts, select a
+    matching contact when multiple results are found, confirm the
+    deletion, and permanently remove the selected contact from the
+    storage.
+
+    Informative messages are displayed for invalid input,
+    unsuccessful searches, cancellation requests, and successful
+    deletions.
+
+    Returns:
+        None
+    """
+    
     print("\n--- 🗑 Deleting Contacts 🗑 ---")
     
     if not contacts.get_contacts():
@@ -149,10 +214,43 @@ def ui_delete_contact():
                 print("\n⚠️ Please enter only (yes/no)")
             
 def ui_exit_app():
+    """
+    Terminate the application gracefully.
+
+    Displays a farewell message to the user and exits the
+    application with a successful termination status.
+
+    Returns:
+        None
+
+    Raises:
+        SystemExit:
+            Raised to terminate the program.
+    """
+    
     print("\nThank you for using KRYOS CONTACT BOOK MANAGER, Bye!")
     sys.exit()
 
 def main():
+    """
+    Run the application's main control loop.
+
+    Initializes the application's interactive menu, displays the
+    available operations, processes user selections, and delegates
+    execution to the corresponding user interface functions.
+
+    The function also provides centralized exception handling to
+    ensure graceful termination when interrupted by the user and
+    to log unexpected critical errors before exiting the program.
+
+    Returns:
+        None
+
+    Raises:
+        SystemExit:
+            Raised when the application exits normally or after
+            encountering a critical unrecoverable error.
+    """
   
     menu_actions = {
       '1' : {'text' : 'Add Contact', 'func' : ui_add_contact},
