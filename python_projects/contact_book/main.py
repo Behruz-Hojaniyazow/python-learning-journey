@@ -266,7 +266,7 @@ def main():
             print("    Welcome to KRYOS Contact Book!")
             print("-" * 40)
             for key, value in menu_actions.items():
-              print(f"{key} -> {value['text']}")
+                print(f"{key} -> {value['text']}")
             print("=" * 40)
           
             choice = input("\nChoose an action: ").strip()
