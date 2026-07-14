@@ -59,21 +59,21 @@ class ContactService:
     """
   
     def __init__(self):
-    """
-    Initialize the contact service.
-
-    Creates and configures the application logger and initializes
-    the JSON storage handler responsible for loading and persisting
-    contact data.
-
-    Attributes:
-        logger (logging.Logger):
-            Configured logger instance used for application logging.
-
-        json_contacts (JSONContactStorage):
-            Storage manager responsible for reading and writing
-            contact data to the JSON file.
-    """
+        """
+        Initialize the contact service.
+    
+        Creates and configures the application logger and initializes
+        the JSON storage handler responsible for loading and persisting
+        contact data.
+    
+        Attributes:
+            logger (logging.Logger):
+                Configured logger instance used for application logging.
+    
+            json_contacts (JSONContactStorage):
+                Storage manager responsible for reading and writing
+                contact data to the JSON file.
+        """
         self.logger = get_logger()
         self.json_contacts = JSONContactStorage(FILE_NAME)
       
