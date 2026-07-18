@@ -18,10 +18,8 @@ class, the UI layer (``main.py``) can remain a thin presentation shell
 that never needs to know about validation rules or storage mechanics.
 """
 
-from storage import JSONStudentStorage
 from validators import StudentValidator
 from logger_config import get_logger
-from config import FILE_NAME
 from status import StudentStatus
 
 class StudentService:
@@ -43,10 +41,10 @@ class StudentService:
             operation performed by this service.
     """
     
-    def __init__(self):
+    def __init__(self, storage: JSONStudentStorage):
         """Initialize the service with its storage backend and logger."""
         
-        self.json_students = JSONStudentStorage(FILE_NAME)
+        self.storage = storage
         self.logger = get_logger()
         
     def add_student(self, name: str, age: str, score: str) -> StudentStatus:
@@ -76,7 +74,7 @@ class StudentService:
         """
 
         
-        students = self.json_students.load_students()
+        students = self.storage.load_students()
           
         # check students' name format
         is_valid, result_name = StudentValidator.validate_name(name)
@@ -112,7 +110,7 @@ class StudentService:
         }
           
         students.append(student)
-        if self.json_students.save_students(students):
+        if self.storage.save_students(students):
             self.logger.info("Student added successfully!")
             return StudentStatus.SUCCESS
         else:
@@ -132,7 +130,7 @@ class StudentService:
             empty list if no students have been added yet.
         """
       
-        return self.json_students.load_students()
+        return self.storage.load_students()
         
     def search_students(self, name: str) -> tuple:
         """Function that searches a student from the list
@@ -157,7 +155,7 @@ class StudentService:
             matching student dictionaries.
         """
       
-        students = self.json_students.load_students()
+        students = self.storage.load_students()
         
         # check whether it is in a true format
         is_valid, result_name  = StudentValidator.validate_name(name)
@@ -200,7 +198,7 @@ class StudentService:
             was removed and the change was saved successfully.
         """
       
-        students = self.json_students.load_students()
+        students = self.storage.load_students()
         
         is_valid, result_name = StudentValidator.validate_name(name)
         if not is_valid:
@@ -213,7 +211,7 @@ class StudentService:
             self.logger.info(f"Deletion failed no student found named: {target_name.title()}")
             return StudentStatus.NOT_FOUND
               
-        if self.json_students.save_students(updated_students):
+        if self.storage.save_students(updated_students):
             self.logger.info(f"Student deleted successfully: Name {target_name.title()}")
             return StudentStatus.SUCCESS
         self.logger.error(f"Failed to save changes after deleting student '{target_name}'")

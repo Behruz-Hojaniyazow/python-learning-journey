@@ -29,9 +29,12 @@ import sys
 from student_service import StudentService
 from logger_config import get_logger
 from status import StudentStatus
+from storage import JSONStudentStorage
+from config import FILE_NAME
 
+storage = JSONStudentStorage(FILE_NAME)
 logger = get_logger()
-students = StudentService()
+students = StudentService(storage)
 
 COMMON_ERRORS = {
     StudentStatus.EMPTY_NAME : "❌️ Error: Name cannot be empty",
