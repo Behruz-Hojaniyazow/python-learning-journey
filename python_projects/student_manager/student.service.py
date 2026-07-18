@@ -1,201 +1,220 @@
-import sys
-from storage import (
-  load_students,
-  save_students
-)
-from validators import (
-  validate_name,
-  validate_age,
-  validate_score
-)
+"""
+Service (business-logic) layer for the Kryos Student Manager System.
+
+This module defines :class:`StudentService`, the sole gateway through
+which the presentation layer (``main.py``) interacts with student data.
+It coordinates between three collaborators:
+
+    * :class:`validators.StudentValidator` — sanitizes and validates raw
+      user input before it is trusted.
+    * :class:`storage.JSONStudentStorage` — persists and retrieves the
+      canonical list of student records.
+    * The shared application logger — records every significant business
+      event (successful additions, validation failures, duplicate
+      detection, deletions, and save errors) for auditability.
+
+By concentrating all add/search/delete business rules in this single
+class, the UI layer (``main.py``) can remain a thin presentation shell
+that never needs to know about validation rules or storage mechanics.
+"""
+
+from storage import JSONStudentStorage
+from validators import StudentValidator
 from logger_config import get_logger
+from config import FILE_NAME
+from status import StudentStatus
 
-logger = get_logger()
+class StudentService:
+    """Coordinates validation, persistence, and business rules for students.
 
-def add_student():
-  """Collects student data (name, age, grade) and returns it in a list format"""
-  
-  students = load_students()
-  order = len(students) + 1
-  
-  print("\nStart entering students. To stop, type 'stop' instead of the name.")
-  
-  while True:
-    print(f"\n{order}-Enter student information!")
-    name = input("Name: (or stop): ").strip()
+    This class is the single source of truth for all operations that can
+    be performed on the class register: adding, listing, searching for,
+    and deleting student records. Every public method returns a
+    :class:`status.StudentStatus` (or a tuple including one) so that
+    calling code can react to outcomes without needing to inspect
+    exceptions or raw data.
+
+    Attributes:
+        json_students (JSONStudentStorage): The storage backend instance
+            used to load and save the list of student records, configured
+            to use the file path defined in :data:`config.FILE_NAME`.
+        logger (logging.Logger): The shared application logger, used to
+            record informational, warning, and error events for every
+            operation performed by this service.
+    """
     
-    # Allow the user to stop adding students
-    if name.lower() == 'stop':
-      print("Data collection has stopped")
-      break
-    
-    # check students' name format
-    is_valid, cleaned_name = validate_name(name)
-    if not is_valid:
-      logger.warning(f"{cleaned_name}")
-      print(f"\n{cleaned_name}")
-      continue
-    
-    # check duplicate student
-    duplicate_found = False
-    for student in students:
-      if student['name'].lower() == cleaned_name.lower():
-        logger.warning(f"'{name.title()}' already exists")
-        print(f"'{name.title()}' student already exists in Class Register")
-        duplicate_found = True
-        break
-      
-    if duplicate_found:
-      continue
-    
-    age = input("Age: ")
-    is_valid, validated_age = validate_age(age)
-    if not is_valid:
-      logger.warning(f"{validated_age}")
-      print(f"\n{validated_age}")
-      continue
-    
-    score = input("Score: ")
-    
-    # Ensure score stays in true format
-    is_valid, validated_score = validate_score(score)
-    if not is_valid:
-      logger.warning(f"{validated_score}")
-      print(f"\n{validated_score}")
-      continue
-    
-    # Store student information in dictionary format
-    student = {
-      'name' : cleaned_name,
-      'age' : validated_age,
-      'score' : validated_score
-    }
-    
-    students.append(student)
-    order += 1
-    if save_students(students):
-      print("✅️ Student has been added successfully!")
-      logger.info("Student added successfully!")
-  
-def show_students():
-  """Outputs name, age, and scores to the console in a nice table format"""
-  students = load_students()
-  
-  if not students:
-    print("\n(!) Student list is empty")
-    return
-  
-  sorted_students = sorted(students, key=lambda x: (-x['score'], x['name'].lower()))
-  
-  print('\n' + '=' * 43)
-  print(f"{'Student name':<18} | {'Age':<6} | {'Score':<5}")
-  print('-' * 43)
-  
-  for ind, student in enumerate(sorted_students, start=1):
-    print(
-      f"{ind}."
-      f"{student['name'].title():<16} | "
-      f"{student['age']:<6} | "
-      f"{student['score']:<5}"
-      )
-    print("-" * 43)
-    
-def search_students():
-  """function that seraches a student from the list"""
-  
-  students = load_students()
-  
-  if not students:
-    print("\n(!) Student list is empty")
-    return
-  
-  while True:
-    print("\nType (stop) to stop searching")
-    user_input = input("\nEnter the name of the student you are looking for: ").strip()
-    
-    if user_input.lower() == 'stop':
-      print("\nSearch stopped, Thanks!")
-      break
-    
-    # check whether it is in a true format
-    is_valid, cleaned_name  = validate_name(user_input)
-    if not is_valid:
-      logger.warning(f"{cleaned_name}")
-      print(f"\n{cleaned_name}")
-      continue
-    
-    # Track whether the student exists in the register
-    found = False
-      
-    for student in students:
-      if student['name'].lower() == cleaned_name.lower():
-        logger.info(f"Successfully student found: Name: '{student['name'].title()}'")
-        print("\nYes! This student is in the Class Register")
-        print(f"Name {student['name'].title()} | Age {student['age']} | Score {student['score']}")
-        found = True
-        break
-    if not found:
-      logger.info(f"Search failed, no students found named {user_input.title()}")
-      print(f"\nUnfortunately! a student named {user_input.title()} is not in Class Register!")
-    
-def delete_students():
-  """Function that deletes students from the Class Register"""
-  
-  students = load_students()
-  
-  if not students:
-    print("\nNo students found to delete")
-    return
-  
-  print("Type 'stop' to stop deleting")
-  while True:
-    print("\nEnter a student name to delete")
-    choice = input('Name or (stop): ').strip()
-    
-    if choice.lower() == 'stop':
-      print("\nStudent deletion stopped")
-      break
-    
-    is_valid, cleaned_name = validate_name(choice)
-    if not is_valid:
-      logger.warning(f"{cleaned_name}")
-      print(f"\n{cleaned_name}")
-      continue
-    
-    deleted = False
-    
-    for student in students[:]:
-      if cleaned_name.lower() == student['name'].lower():
-        deleted = True
+    def __init__(self):
+        """Initialize the service with its storage backend and logger."""
         
-        while True:
+        self.json_students = JSONStudentStorage(FILE_NAME)
+        self.logger = get_logger()
         
-          confirm = input(f"\nDelete {student['name'].title()} (yes/no): ").strip().lower()
-          if confirm in ('yes', 'y'):
-            students.remove(student)
-            if save_students(students):
-              logger.info(f"Successfully deleted: \nName: {student['name'].title()}")
-              print(f"\n{student['name'].title()} was deleted successfully!")
+    def add_student(self, name: str, age: str, score: str) -> StudentStatus:
+        """Collects student data (name, age, grade)
+
+        Validates the raw ``name``, ``age``, and ``score`` inputs in
+        sequence (short-circuiting and returning immediately on the
+        first validation failure), checks for a duplicate name already
+        present in the class register, and — if all checks pass —
+        appends a new student record and persists the updated list to
+        storage.
+
+        Args:
+            name (str): The raw, unvalidated student name.
+            age (str): The raw, unvalidated student age.
+            score (str): The raw, unvalidated student score.
+
+        Returns:
+            StudentStatus: :attr:`StudentStatus.SUCCESS` if the student
+            was validated and saved successfully;
+            :attr:`StudentStatus.DUPLICATE_NAME` if a student with the
+            same (case-insensitive) name already exists;
+            :attr:`StudentStatus.SAVE_ERROR` if validation passed but
+            persisting to storage failed; or any of the name/age/score
+            specific validation failure statuses returned by
+            :class:`StudentValidator`.
+        """
+
+        
+        students = self.json_students.load_students()
+          
+        # check students' name format
+        is_valid, result_name = StudentValidator.validate_name(name)
+        if not is_valid:
+            self.logger.warning(f"Adding student failed (Name Error): {result_name.name}")
+            return result_name
+        clean_name = result_name
+          
+        # check duplicate student
+        for student in students:
+            if student['name'].lower() == clean_name.lower():
+                self.logger.warning(f"'{clean_name.title()}' already exists")
+                return StudentStatus.DUPLICATE_NAME
+      
+        is_valid, result_age = StudentValidator.validate_age(age)
+        if not is_valid:
+            self.logger.warning(f"Adding student failed (Age Error): {result_age.name}")
+            return result_age
+        clean_age = result_age
+          
+        # Ensure score stays in true format
+        is_valid, result_score = StudentValidator.validate_score(score)
+        if not is_valid:
+            self.logger.warning(f"Adding student failed (Score Error): {result_score.name}")
+            return result_score
+        clean_score = result_score
+          
+        # Store student information in dictionary format
+        student = {
+            'name' : clean_name,
+            'age' : clean_age,
+            'score' : clean_score
+        }
+          
+        students.append(student)
+        if self.json_students.save_students(students):
+            self.logger.info("Student added successfully!")
+            return StudentStatus.SUCCESS
+        else:
+            self.logger.error("Adding student failed (System Error during save)")
+            return StudentStatus.SAVE_ERROR
             
-              plural_suffix = 'student' if len(students) == 1 else 'students'
-              print(f"\n{len(students)} {plural_suffix} left in the Class Register")
-            else:
-              print("\nFailed to save changes")
-          
-            break
-        
-          elif confirm in ('no', 'n'):
-            print(f"\n{student['name'].title()} was not deleted!")
-            break
-        
-          else:
-            print("\nPlease type 'yes or no'!")
-          
-    if not deleted:
-      logger.warning(f"Deleting Failed, No student found named '{choice.title()}'")
-      print(f"\nNo student found named {choice.title()}!")
       
-def exit_app():
-  """Exit the application gracefully"""
-  print("\nThank you for using Kryos Student Manager! GoodBye!")
-  sys.exit()
+    def get_students(self) -> list:
+        """Retrieves the full, unfiltered list of student records currently
+        persisted in storage. This is a thin, read-only pass-through to
+        the storage layer, provided so that calling code never needs to
+        interact with :class:`JSONStudentStorage` directly.
+
+        Returns:
+            list: The complete list of student dictionaries, each
+            containing ``name``, ``age``, and ``score`` keys. Returns an
+            empty list if no students have been added yet.
+        """
+      
+        return self.json_students.load_students()
+        
+    def search_students(self, name: str) -> tuple:
+        """Function that searches a student from the list
+
+        Validates the provided search term, then performs a
+        case-insensitive *substring* match against every student's name
+        in the class register (allowing partial-name searches, e.g.
+        searching "an" will match "Anna" and "Johan").
+
+        Args:
+            name (str): The raw, unvalidated name (or partial name) to
+                search for.
+
+        Returns:
+            tuple[StudentStatus, list]: A two-element tuple containing
+            the outcome status and the list of matching student
+            dictionaries. Possible statuses are: a name-validation
+            failure status paired with an empty list if ``name`` itself
+            is invalid; :attr:`StudentStatus.NOT_FOUND` paired with an
+            empty list if no students match; or
+            :attr:`StudentStatus.SUCCESS` paired with one or more
+            matching student dictionaries.
+        """
+      
+        students = self.json_students.load_students()
+        
+        # check whether it is in a true format
+        is_valid, result_name  = StudentValidator.validate_name(name)
+        if not is_valid:
+            self.logger.warning(f"Searching student failed (Name Error): {result_name.name}")
+            return result_name, []
+        clean_name = result_name
+        
+        # Track whether the student exists in the register
+        found_students = []
+        for student in students:
+            if clean_name.lower() in student['name'].lower():
+                found_students.append(student)
+                
+        if not found_students:
+            self.logger.info(f"Search failed, no students found matching '{clean_name.title()}'")
+            return StudentStatus.NOT_FOUND, []
+        
+        plural_prefix = 'students' if len(found_students) > 1 else 'student'    
+        self.logger.info(f"Search successful: Found {len(found_students)} {plural_prefix} matching '{clean_name.title()}'")
+        return StudentStatus.SUCCESS, found_students
+        
+    def delete_students(self, name: str) -> StudentStatus:
+        """Function that deletes students from the Class Register
+
+        Validates the provided name, then removes every student whose
+        name matches (case-insensitively, exact match) the target name
+        from the class register and persists the updated list.
+
+        Args:
+            name (str): The raw, unvalidated exact name of the student to
+                remove.
+
+        Returns:
+            StudentStatus: A name-validation failure status if ``name``
+            is invalid; :attr:`StudentStatus.NOT_FOUND` if no student
+            with that exact name exists; :attr:`StudentStatus.SAVE_ERROR`
+            if the student was found but the updated list could not be
+            persisted; or :attr:`StudentStatus.SUCCESS` if the student
+            was removed and the change was saved successfully.
+        """
+      
+        students = self.json_students.load_students()
+        
+        is_valid, result_name = StudentValidator.validate_name(name)
+        if not is_valid:
+            self.logger.warning(f"Deleting student failed (Name Error): {result_name.name}")
+            return result_name
+        target_name = result_name
+        
+        updated_students = [s for s in students if s['name'].lower() != target_name.lower()]
+        if len(updated_students) == len(students):
+            self.logger.info(f"Deletion failed no student found named: {target_name.title()}")
+            return StudentStatus.NOT_FOUND
+              
+        if self.json_students.save_students(updated_students):
+            self.logger.info(f"Student deleted successfully: Name {target_name.title()}")
+            return StudentStatus.SUCCESS
+        self.logger.error(f"Failed to save changes after deleting student '{target_name}'")
+        return StudentStatus.SAVE_ERROR
