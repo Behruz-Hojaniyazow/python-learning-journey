@@ -1,286 +1,284 @@
+"""
+Business logic layer for the Movie Recommender application.
+
+This module defines `MovieService`, the central orchestrator that
+coordinates between the persistence layer (`MovieStorage`), the input
+validation layer (`MovieValidator`), and the application logger. Every
+core feature of the application — recommending, adding, searching for,
+and deleting movies — is implemented as a method on this class.
+
+`MovieService` deliberately contains no direct user-interaction code
+(no `input()` or `print()` calls); it accepts already-collected raw
+input from the UI layer, validates and processes it, and returns a
+`MovieStatus` (plus any relevant data) describing the outcome. This
+separation keeps the UI layer (`main.py`) free to focus purely on
+presentation and menu flow, while all business rules live here.
+"""
+
 import random
-from storage import (
-  load_movies,
-  save_movies
-)
-from validators import (
-  validate_movie,
-  validate_genre,
-  duplicate_movie,
-  duplicate_genre
-)
+from storage import MovieStorage
+from validators import MovieValidator
 from logger_config import get_logger
+from status import MovieStatus
 
-logger = get_logger()
+class MovieService:
+    """
+    Coordinates movie-related operations between storage, validation,
+    and logging.
 
-def recommend_movie():
-  """Function that recommends a movie depending on a users genre"""
-  
-  movies = load_movies()
-  
-  if not movies:
-    print("\nNo new movies to watch!")
-    return
-  
-  genre_names = list(movies.keys())
-  
-  while True:
-    print("\nType (stop) or 0 to stop watching movies")
-    
-    print("\n" + "=" * 35)
-    print("What genre of movie would you like to see?")
-    print("-" * 35)
-    for ind, genre in enumerate(genre_names, start=1):
-      print(f"{ind} -> {genre.title()}")
-      print("-" * 35)
-    
-    user_choice = input("\nChoose a genre you want to watch: ").strip()
-      
-    if user_choice == "0" or user_choice.lower() == "stop":
-      print("\nRecommending movies stopped!")
-      break
-    
-    if user_choice.isdigit() and 1 <= int(user_choice) <= len(genre_names):
-      selected_genre = genre_names[int(user_choice) -1]
-      movies_list = movies[selected_genre]
-      
-      if not movies_list:
-        print(f"\nNo movies left in {selected_genre.title()} genre!")
-        continue
-      
-      chosen_movie = random.choice(movies_list)
-      print(f"\n🍿 Recommended movie for you: {chosen_movie.title()} ({selected_genre.title()}) genre!")
-      print("Enjoy your view!")
-      
-      logger.info(f"Successfully recommended '{chosen_movie}' from '{selected_genre}' genre to user")
-      
-    else:
-      print("\nInvalid choice, Please choose a valid option!")
+    `MovieService` acts as the single entry point for all movie
+    business logic. It depends on an injected `MovieStorage` instance
+    (dependency injection), which decouples this class from any
+    specific persistence mechanism — the storage backend could be
+    swapped (e.g., from JSON to a database) without requiring changes
+    to this class's logic.
 
-def add_movie():
-  """Function that adds movies into the existing dictionary"""
-  
-  movies = load_movies()
-  
-  while True:
-    print("\nType 'stop' to stop adding movies")
-    
-    user_input = input("Do you want to add a new film? (yes/no/stop) ").strip()
-    
-    if user_input.lower() == 'stop' or user_input.lower() == 'no':
-      print("\nAdding movies stopped!")
-      break
-    
-    if user_input.lower() in ('yes', 'y'):
-      
-      print("\n --- Existing Genres---\n")
-      
-      for ind, genre in enumerate(movies.keys(), start = 1):
-        print(f"{ind} -> {genre.title()}")
-        print("-" * 35)
-      
-      new_genre = input("Would you like to add a new genre (yes/no)? ").strip()
-      
-      if not new_genre:
-        print("\nAnswer name cannot be empty")
-        continue
-      
-      if new_genre.lower() in ('yes', 'y'):
-        selected_genre = input(f"Enter a new genre: ").strip()
-        is_valid, result = validate_genre(selected_genre)
-        if not is_valid:
-          print(f"\n{result}")
-          continue
+    Attributes:
+        logger (logging.Logger): Shared application logger used to
+            record the outcome of every operation (successes,
+            warnings, and errors).
+        storage (MovieStorage): The persistence handler used to load
+            and save the movie database.
+    """
+    def __init__(self, storage: MovieStorage):
+        """
+        Initialize the service with its required storage dependency.
+
+        Args:
+            storage (MovieStorage): The storage handler responsible
+                for reading and writing the movie database.
+        """
         
-        is_valid, result = duplicate_genre(selected_genre, movies)
-        if not is_valid:
-          print(f"\n{result}")
-          logger.warning(f"Failed to add genre: '{selected_genre.title()}' already exists")
-          continue
-        selected_genre = selected_genre.lower()
-      elif new_genre.lower() in ('no', 'n'):
-        selected_genre = input("What genre of movie would you like to add (write the name): ").strip()
-        
-        is_valid, result = validate_genre(selected_genre)
-        if not is_valid:
-          print(f"\n{result}")
-          continue
-        
-        if selected_genre.lower() not in [g.lower() for g in movies.keys()]:
-          print(f"\nNo such genre found, Please select an existing genre")
-          logger.warning(f"Failed to find genre: '{selected_genre}' during movie addition")
-          continue
-        selected_genre = selected_genre.lower()
-        
-      else:
-        print("Wrong Command")
-        continue
-      
-      movie_name = input(f"What movie would you like to add for {selected_genre.title()} genre? ").strip()
-      
-      is_valid, result = validate_movie(movie_name)
-      if not is_valid:
-        print(f"\n{result}")
-        continue
-      
-      is_valid, result = duplicate_movie(movie_name, movies)
-      if not is_valid:
-        print(f"\n{result}")
-        logger.warning(f"Failed to add movie: '{movie_name.title()}' already exists in database")
-        continue
-  
-      if new_genre.lower() in ('yes', 'y'):
-        movies[selected_genre] = [movie_name]
-        save_movies(movies)
-    
-      else:
-        movies[selected_genre].append(movie_name)
-        save_movies(movies)
-      print(f"✅️ Great! The movie '{movie_name.title()}' has been successfully added!")
-      logger.info(f"Successfully added '{movie_name}' movie")
+        self.logger = get_logger()
+        self.storage = storage
 
-def search_movie():
-  """
-  Search for a movie in the database.
+    def recommend_movie(self, user_choice_str: str) -> tuple:
+        """
+        Recommend a random movie from a user-selected genre.
 
-  Returns:
-    None
-  """
-  
-  movies = load_movies()
-  
-  if not movies:
-    print("\nNo movie found, Database is empty!")
-    return
-  
-  while True:
-    print("\nType 'stop' to stop searching!")
-    user_input = input("Enter a movie that you need: ").strip()
-    
-    if user_input.lower() == 'stop':
-      print("\nSearching movie stopped")
-      break
-    
-    is_valid, result = validate_movie(user_input)
-    if not is_valid:
-      print(f"\n{result}")
-      continue
-    
-    found_genre = ""
-    found_movie = ""
-    found = False
-    
-    for genre, movies_list in movies.items():
-      for movie in movies_list:
-        if user_input.lower() == movie.lower():
-          found_genre = genre
-          found_movie = movie
-          found = True
-          break
-      if found:
-        break
-    if found:
-      print(f"\nYes, This movie was found")
-      print(f"Genre: {found_genre.title()}")
-      print(f"Movie title: {found_movie.title()}")
-      logger.info(f"Successfully found movie: {found_movie.title()} from {found_genre.title()} genre")
-    else:
-      print(f"\nUnfortunately, {user_input.title()} movie not found")
-      logger.info(f"Search failed, No movie found named {user_input.title()}")
-      
-def delete_movie():
-  """Function that deletes movies entered by the user"""
-  
-  movies = load_movies()
-  
-  if not movies:
-    print("\nThere's no film to delete, Database is empty")
-    return
-  
-  while True:
-    print("\nType 'stop' to stop deleting")
-    user_input = input("\nWhich movie would you like to delete: ").strip()
-    
-    if user_input.lower() == 'stop':
-      print("\nDeleting movies stopped!")
-      break
-    
-    is_valid, result = validate_movie(user_input)
-    if not is_valid:
-      print(f"\n{result}")
-      continue
-    
-    movie_found = False
-    
-    for genre, movies_list in movies.items():
-      for movie in movies_list:
-        if user_input.lower() == movie.lower():
-          movie_found = True
+        Loads the current movie database, validates the user's raw
+        genre selection against the number of available genres, and —
+        if valid — returns a single randomly chosen movie from that
+        genre.
+
+        Args:
+            user_choice_str (str): The raw, 1-based genre number
+                entered by the user (e.g., "2" to select the second
+                genre in the list).
+
+        Returns:
+            tuple[MovieStatus, dict]: On success, `(MovieStatus.SUCCESS,
+            {genre: movie})` containing the selected genre and the
+            recommended movie title. On failure, returns the relevant
+            `MovieStatus` (`INVALID_CHOICE_FORMAT`, `INVALID_CHOICE`,
+            or `NOT_FOUND` if the genre has no movies) paired with an
+            empty dictionary.
+        """
+        
+        
+        movies = self.storage.load_movies()
+        
+        genre_names = list(movies.keys())
           
-          while True:
-            print("\nYes, this movie was found")
-            print(f"Genre: {genre.title()}")
-            print(f"Movie title: {movie.title()}")
+        is_valid, result = MovieValidator.validate_choice(len(genre_names), user_choice_str)
+        if not is_valid:
+            self.logger.warning(f"Recommending movie failed (Genre error): {result.name}")
+            return result, {}
+        user_choice = result
             
-            movie_delete = input(f"\nDelete {movie.title()} (yes/no): ").strip()
+        selected_genre = genre_names[user_choice -1]
+        movies_list = movies.get(selected_genre, [])
         
-            if movie_delete.lower() in ('yes', 'y'):
-              movies_list.remove(movie)
-              save_movies(movies)
-              print(f"\n{movie.title()} has been successfully deleted!")
-              logger.info(f"Successfully deleted {movie.title()}")
-              break
+        if not movies_list:
+            self.logger.warning(f"Recommendation failed: No movies found in '{selected_genre}' genre")
+            return MovieStatus.NOT_FOUND, {}
             
-            elif movie_delete.lower() in ('no', 'n'):
-              print(f"\n{movie.title()} was not deleted")
-              break
+        chosen_movie = random.choice(movies_list)
             
-            else:
-              print("\nInvalid choice, Please choose only 'yes' or 'no'")
-              
-          break
-        
-      if movie_found:
-        break
-              
-    if not movie_found:
-      print(f"\nNo movie found named {user_input.title()}!")
-      logger.warning(f"Delete failed: Movie '{user_input.title()}' not found")
+        self.logger.info(f"Successfully recommended '{chosen_movie}' from '{selected_genre}' genre to user")
+        return MovieStatus.SUCCESS, {selected_genre : chosen_movie}
+  
+    def add_movie(self, user_genre:  str, user_movie: str) -> MovieStatus:
+        """
+        Add a new movie to the database under a given genre.
 
-def show_movies():
-  """Function that shows all existing movies"""
-  
-  movies = load_movies()
-  
-  if not movies:
-    print("\nNo movies found to show")
-    return
-  
-  print("=" * 40)
-  print("     🎬   All Existing Movies   🎬")
-  print("=" * 40)
-  
-  for genre, movies_list in movies.items():
-    movie_number = len(movies_list)
-    plural_suffix = ('movie' if movie_number == 1 else "movies")
-    print(f"\n📌 {genre.upper()} ({movie_number} {plural_suffix}):")
-    print("-" * 40)
+        Validates both the genre and movie title, checks that the
+        movie does not already exist anywhere in the database (case-
+        insensitive, across all genres), and then either appends it to
+        an existing genre (matched case-insensitively) or creates a
+        brand-new genre entry if no match is found. The updated
+        database is then persisted to storage.
+
+        Args:
+            user_genre (str): The raw genre name entered by the user.
+                May refer to an existing genre or introduce a new one.
+            user_movie (str): The raw movie title entered by the user.
+
+        Returns:
+            MovieStatus: `MovieStatus.SUCCESS` if the movie was added
+            and saved successfully; `MovieStatus.EMPTY_GENRE` or
+            `MovieStatus.EMPTY_MOVIE` if either input was blank;
+            `MovieStatus.DUPLICATE_MOVIE` if the movie already exists;
+            `MovieStatus.SAVE_ERROR` if persisting the updated database
+            to storage failed.
+        """
+      
+        movies = self.storage.load_movies()
+                            
+        is_valid, result = MovieValidator.validate_genre(user_genre)
+        if not is_valid:
+            self.logger.warning("Genre name cannot be empty")
+            return result
+        clean_genre = result
+            
+        is_valid, result = MovieValidator.validate_movie(user_movie)
+        if not is_valid:
+            self.logger.warning(f"Movie name cannot be empty")
+            return result
+        clean_movie = result
+      
+        is_valid, result = MovieValidator.duplicate_movie(clean_movie, movies)
+        if not is_valid:
+            self.logger.warning(f"Failed to add movie: '{clean_movie.title()}' already exists in the database")
+            return result
+            
+        existing_genre_key = None
+        for g in movies.keys():
+            if g.lower() == clean_genre.lower():
+                existing_genre_key = g
+                break
+      
+        if existing_genre_key:
+            movies[existing_genre_key].append(clean_movie)
+      
+        else:
+            movies[clean_genre] = [clean_movie]
     
-    if movie_number == 0:
-      print("   (There are no movies in this genre yet!)")
+        if self.storage.save_movies(movies):
+            self.logger.info(f"Successfully added '{clean_movie}' movie")
+            return MovieStatus.SUCCESS
       
-    else:
-      for ind, movie in enumerate(movies_list, start=1):
-        print(f"   {ind}. {movie.title()}")
-  print("\n" + "=" * 40)
-      
-#all_movies = create_movies()
-#show_movies(all_movies)
+        return MovieStatus.SAVE_ERROR
+  
+    def search_movie(self, user_movie: str) -> tuple:
+        """
+        Search the database for movies whose titles contain a query string.
 
-def exit_app():
-  """Exit the application gracefully"""
+        Performs a case-insensitive substring match against every
+        movie title across all genres, and groups the matches by the
+        genre they belong to.
+
+        Args:
+            user_movie (str): The raw search query entered by the
+                user (a full or partial movie title).
+
+        Returns:
+            tuple[MovieStatus, dict]: `(MovieStatus.SUCCESS, found_movies)`
+            where `found_movies` maps each matching genre to a list of
+            matching movie titles, if at least one match is found.
+            `(MovieStatus.NOT_FOUND, {})` if no movies match the query.
+            `(MovieStatus.EMPTY_MOVIE, {})` if the query was blank.
+        """
+      
+        movies = self.storage.load_movies()
+        
+        is_valid, result = MovieValidator.validate_movie(user_movie)
+        if not is_valid:
+            self.logger.warning("Movie name cannot be empty")
+            return result, {}
+        clean_movie = result
+        
+        found_movies = {}
+        for genre, movies_list in movies.items():
+            searching_movies = [
+                movie for movie in movies_list
+                if clean_movie.lower() in movie.lower()
+            ]
+            
+            if searching_movies:
+                found_movies[genre] = searching_movies
+            
+        if found_movies:
+            total_found = sum(len(m_list) for m_list in found_movies.values())
+            plural_suffix = "movies" if total_found != 1 else "movie"
+            self.logger.info(f"Successfully found {total_found} {plural_suffix} matched to user query")
+            return MovieStatus.SUCCESS, found_movies
+                  
+        self.logger.info(f"Search failed, No movie matched the query {clean_movie.title()}")
+        return MovieStatus.NOT_FOUND, {}
+        
+    def delete_movie(self, user_movie: str) -> MovieStatus:
+        """
+        Delete the first movie matching the given title from the database.
+
+        Performs a case-insensitive exact match against movie titles
+        across all genres. When a match is found, it is removed from
+        its genre's list; if that removal empties the genre entirely,
+        the genre key itself is also removed from the database. The
+        updated database is then persisted to storage.
+
+        Note:
+            If the same title were to appear under multiple genres,
+            only the first match encountered (in dictionary iteration
+            order) is removed per call.
+
+        Args:
+            user_movie (str): The raw movie title to delete, as
+                entered by the user.
+
+        Returns:
+            MovieStatus: `MovieStatus.SUCCESS` if a matching movie was
+            found, removed, and the database saved successfully;
+            `MovieStatus.EMPTY_MOVIE` if the input was blank;
+            `MovieStatus.SAVE_ERROR` if persisting the change failed;
+            `MovieStatus.NOT_FOUND` if no matching movie exists.
+        """
+    
+        movies = self.storage.load_movies()
+      
+        is_valid, result = MovieValidator.validate_movie(user_movie)
+        if not is_valid:
+            self.logger.warning("Movie name cannot be empty")
+            return result
+        clean_movie = result
+          
+        for genre, movies_list in list(movies.items()):
+            for movie in movies_list:
+                if clean_movie.lower() == movie.lower():
+                    movies_list.remove(movie)
+                    
+                    if not movies_list:
+                        del movies[genre]
+                        
+                    if self.storage.save_movies(movies):
+                        self.logger.info(f"Successfully deleted {movie.title()}")
+                        return MovieStatus.SUCCESS
+                    else:
+                        self.logger.error("Failed to save changes after deletion")
+                        return MovieStatus.SAVE_ERROR
+        
+        self.logger.warning(f"Delete failed: Movie '{clean_movie.title()}' not found")
+        return MovieStatus.NOT_FOUND
   
-  logger.info("Application closed")
-  print("\nThank you for using Kryos Movie program, GoodBye!")
-  
-  sys.exit()
+    def get_movies_data(self) -> dict:
+        """
+        Retrieve the entire movie database as currently stored.
+
+        Returns:
+            dict: The full movie database, mapping genre names to
+            lists of movie titles.
+        """
+        
+        return self.storage.load_movies()
+        
+    def is_empty(self) -> bool:
+        """
+        Check whether the movie database currently contains no genres.
+
+        Returns:
+            bool: True if the database has zero genre entries;
+            False otherwise. Note that this checks only the number of
+            genre keys, not whether individual genres contain movies.
+        """
+        
+        return len(self.get_movies_data()) == 0
