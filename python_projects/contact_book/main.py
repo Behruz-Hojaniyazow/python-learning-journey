@@ -9,6 +9,7 @@ It also manages application startup, graceful shutdown, and
 global exception handling.
 """
 
+from typing import NoReturn
 import sys
 from contact_service import ContactService, ContactStatus
 from logger_config import get_logger
@@ -17,7 +18,7 @@ logger = get_logger()
 #creating an object
 contacts = ContactService()
 
-def ui_add_contact():
+def ui_add_contact() -> None:
     """
     Display the user interface for creating new contacts.
 
@@ -61,7 +62,7 @@ def ui_add_contact():
         else:
             print(f"\nContact saved successfully: Name {name.title()} | Phone number {phone_num}")
 
-def ui_search_contact():
+def ui_search_contact() -> None:
     """
     Display the user interface for searching contacts.
 
@@ -104,7 +105,7 @@ def ui_search_contact():
                 )
                 print("-" * 40)
 
-def ui_show_contacts():
+def ui_show_contacts() -> None:
     """
     Display all stored contacts in alphabetical order.
 
@@ -136,7 +137,7 @@ def ui_show_contacts():
         )
     print("=" * 43)
     
-def ui_delete_contact():
+def ui_delete_contact() -> None:
     """
     Display the user interface for deleting contacts.
 
@@ -213,7 +214,7 @@ def ui_delete_contact():
             else:
                 print("\n⚠️ Please enter only (yes/no)")
             
-def ui_exit_app():
+def ui_exit_app() -> NoReturn:
     """
     Terminate the application gracefully.
 
@@ -231,7 +232,7 @@ def ui_exit_app():
     print("\nThank you for using KRYOS CONTACT BOOK MANAGER, Bye!")
     sys.exit()
 
-def main():
+def main() -> None:
     """
     Run the application's main control loop.
 

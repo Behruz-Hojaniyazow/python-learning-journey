@@ -20,7 +20,7 @@ class InputValidator:
     """
     
     @staticmethod
-    def validate_name(name: str):
+    def validate_name(name: str) -> tuple[bool, str | None]:
         """
         Validate a contact name.
     
@@ -46,7 +46,7 @@ class InputValidator:
         return True, None
         
     @staticmethod    
-    def validate_phone(phone: str):
+    def validate_phone(phone: str) -> tuple[bool, str | None]:
         """
         Validate a phone number.
     

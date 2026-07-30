@@ -10,9 +10,15 @@ business logic while providing centralized error handling and
 logging.
 """
 
+import logging
 import json
+from typing import TypedDict
 from logger_config import get_logger
 
+class ContactData(TypedDict):
+    name: str
+    phone: str
+    
 class JSONContactStorage:
     """
     Provide JSON-based persistent storage for contact data.
@@ -34,7 +40,10 @@ class JSONContactStorage:
             events, warnings, and exceptions.
     """
     
-    def __init__(self, file_name: str):
+    logger: logging.Logger
+    file_name: str
+    
+    def __init__(self, file_name: str) -> None:
         """
         Initialize the JSON storage manager.
     
@@ -59,7 +68,7 @@ class JSONContactStorage:
         self.file_name = file_name
         self.logger = get_logger()
       
-    def load_contacts(self) -> list:
+    def load_contacts(self) -> list[ContactData]:
         """
         Load all contacts from the JSON storage file.
     
@@ -78,7 +87,7 @@ class JSONContactStorage:
         try:
           
             with open(self.file_name, 'r', encoding='utf-8') as file:
-                contacts = json.load(file)
+                contacts: list[ContactData] = json.load(file)
               
             return contacts
             
@@ -99,7 +108,7 @@ class JSONContactStorage:
             
             return []
         
-    def save_contacts(self, contacts : list) -> bool:
+    def save_contacts(self, contacts : list[ContactData]) -> bool:
         """
         Save the contact list to the JSON storage file.
     

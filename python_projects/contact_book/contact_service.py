@@ -10,6 +10,8 @@ the outcome of contact-related operations throughout the
 application.
 """
 
+import logging
+from typing import TypedDict
 from enum import Enum, auto
 from storage import JSONContactStorage
 from validators import InputValidator
@@ -34,6 +36,10 @@ class ContactStatus(Enum):
     INVALID_PHONE = auto()
     SAVE_ERROR = auto()
     NOT_FOUND = auto()
+    
+class ContactData(TypedDict):
+    name: str
+    phone: str
 
 class ContactService:
     """
@@ -57,8 +63,11 @@ class ContactService:
             Storage manager responsible for loading and saving
             contact data to the JSON file.
     """
+    
+    logger: logging.Logger
+    json_contacts: JSONContactStorage
   
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the contact service.
     
@@ -77,7 +86,7 @@ class ContactService:
         self.logger = get_logger()
         self.json_contacts = JSONContactStorage(FILE_NAME)
       
-    def add_contact(self, name: str, phone_number: str):
+    def add_contact(self, name: str, phone_number: str) -> tuple[ContactStatus, str | None]:
         """
         Create and save a new contact after validating the provided data.
     
@@ -111,7 +120,7 @@ class ContactService:
                 phone number validation fails; otherwise it is None.
         """
         
-        contacts = self.json_contacts.load_contacts()
+        contacts: list[ContactData] = self.json_contacts.load_contacts()
         
         user_name = name.strip()
         # Validate name input
@@ -154,7 +163,7 @@ class ContactService:
             self.logger.error(f"Failed to save  contact: ({user_name.title()})")
             return ContactStatus.SAVE_ERROR, None
       
-    def get_contacts(self) -> list:
+    def get_contacts(self) -> list[ContactData]:
         """
         Retrieve all stored contacts.
 
@@ -170,7 +179,7 @@ class ContactService:
       
         return self.json_contacts.load_contacts()
       
-    def search_contact(self, query: str):
+    def search_contact(self, query: str) -> tuple[ContactStatus, list[ContactData]]:
         """
         Search for contacts whose names match the given query.
     
@@ -191,7 +200,7 @@ class ContactService:
                 - ContactStatus.NOT_FOUND if no matching contacts exist.
         """
       
-        contacts = self.json_contacts.load_contacts()
+        contacts: list[ContactData] = self.json_contacts.load_contacts()
         
         clean_query = query.strip().lower()
         # Validate a user name
@@ -203,10 +212,9 @@ class ContactService:
         # PROFESSIONAL LOG: Who is the user looking for?
         self.logger.info(f"Searching for a contact, Search query: '{clean_query.title()}'")
         
-        found_contact = []
-        for contact in contacts:
-            if clean_query.lower() in contact['name'].lower():
-                found_contact.append(contact)
+        found_contact: list[ContactData] = [
+            contact for contact in contacts if clean_query.lower() in contact['name'].lower()
+        ]
               
         if not found_contact:
             # We write at INFO level because this is not an error, just a result not found
@@ -216,7 +224,7 @@ class ContactService:
         self.logger.info(f"Search result: '{clean_query.title()}' contact found")
         return ContactStatus.SUCCESS, found_contact
           
-    def delete_contact(self, name: str):
+    def delete_contact(self, name: str) -> ContactStatus:
         """
         Delete a contact using an exact name match.
     
@@ -237,7 +245,7 @@ class ContactService:
                   could not be saved.
         """
       
-        contacts = self.json_contacts.load_contacts()
+        contacts: list[ContactData] = self.json_contacts.load_contacts()
         
         target_name = name.strip().lower()
         is_valid, error_detail = InputValidator.validate_name(target_name)
@@ -245,7 +253,7 @@ class ContactService:
             self.logger.warning(f"Deleting contact failed: name left blank")
             return ContactStatus.EMPTY_NAME
         
-        updated_contacts = [c for c in contacts if c['name'].lower() != target_name]
+        updated_contacts: list[ContactData] = [c for c in contacts if c['name'].lower() != target_name]
         if len(updated_contacts) == len(contacts):
             self.logger.info(f"Deletion failed: '{target_name.title()}' not found")
             return ContactStatus.NOT_FOUND
