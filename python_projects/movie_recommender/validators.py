@@ -14,7 +14,11 @@ handle every validation step uniformly, without needing to catch
 exceptions or interpret different return shapes for different checks.
 """
 
+from typing import TypeAlias
 from status import MovieStatus
+from models import MovieData
+ValidateMovieGenre: TypeAlias = tuple[bool, str | MovieStatus]
+ValidateChoice: TypeAlias = tuple[bool, int | MovieStatus]
 
 class MovieValidator:
     """
@@ -28,7 +32,7 @@ class MovieValidator:
     """
 
     @staticmethod
-    def validate_movie(movie: str):
+    def validate_movie(movie: str) -> ValidateMovieGenre:
         """
         Validate that a movie title is not empty or whitespace-only.
 
@@ -53,7 +57,7 @@ class MovieValidator:
         return True, cleaned_movie
     
     @staticmethod  
-    def validate_genre(genre: str):
+    def validate_genre(genre: str) -> ValidateMovieGenre:
         """
         Validate that a genre name is not empty or whitespace-only.
 
@@ -79,7 +83,7 @@ class MovieValidator:
         return True, cleaned_genre
     
     @staticmethod  
-    def duplicate_movie(user_input: str, movies: dict):
+    def duplicate_movie(user_input: str, movies: MovieData) -> ValidateMovieGenre:
         """
         Check whether a movie already exists anywhere in the database.
 
@@ -110,7 +114,7 @@ class MovieValidator:
         return True, target_movie
     
     @staticmethod  
-    def duplicate_genre(user_input: str, movies: dict):
+    def duplicate_genre(user_input: str, movies: MovieData) -> ValidateMovieGenre:
         """
         Check whether a genre already exists in the database.
 
@@ -136,7 +140,7 @@ class MovieValidator:
         return True, target_genre
         
     @staticmethod   
-    def validate_choice(list_length: int, user_choice: str):
+    def validate_choice(list_length: int, user_choice: str) -> ValidateChoice:
         """
         Validate a user's numeric menu selection against a valid range.
 

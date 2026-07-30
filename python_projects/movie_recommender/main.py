@@ -19,6 +19,7 @@ both expected (Ctrl+C) and unexpected critical errors.
 
 
 import sys
+from typing import NoReturn
 from movie_service import MovieService
 from logger_config import get_logger
 from storage import MovieStorage
@@ -48,7 +49,7 @@ COMMON_ERRORS = {
     MovieStatus.EMPTY_DATA : "⚠️ No movies found in the database"
 }
 
-def ui_add_movie():
+def ui_add_movie() -> None:
     """
     Run the interactive "Add Movie" screen.
 
@@ -125,7 +126,7 @@ def ui_add_movie():
     
     
     
-def ui_recommend_movie():
+def ui_recommend_movie() -> None:
     """
     Run the interactive "Recommend Movie" screen.
 
@@ -181,7 +182,7 @@ def ui_recommend_movie():
         else:
             print(message)
     
-def ui_search_movie():
+def ui_search_movie() -> None:
     """
     Run the interactive "Search Movies" screen.
 
@@ -227,7 +228,7 @@ def ui_search_movie():
         else:
             print(f"{message}")
     
-def ui_show_movies():
+def ui_show_movies() -> None:
     """
     Run the "Show Movies" screen.
 
@@ -265,7 +266,7 @@ def ui_show_movies():
         
         print_separator()
     
-def ui_delete_movie():
+def ui_delete_movie() -> None:
     """
     Run the interactive "Delete Movie" screen.
 
@@ -367,7 +368,7 @@ def ui_delete_movie():
         else:
             print(f"\n{message}")
             
-def ui_exit_app():
+def ui_exit_app() -> NoReturn:
     """
     Display a goodbye screen and terminate the application.
 
@@ -389,7 +390,7 @@ def ui_exit_app():
  
     
 
-def main():
+def main() -> None:
     """
     Run the application's main menu loop.
 

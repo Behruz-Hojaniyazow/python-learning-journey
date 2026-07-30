@@ -16,6 +16,7 @@ presentation and menu flow, while all business rules live here.
 """
 
 import random
+from models import MovieData
 from storage import MovieStorage
 from validators import MovieValidator
 from logger_config import get_logger
@@ -40,7 +41,7 @@ class MovieService:
         storage (MovieStorage): The persistence handler used to load
             and save the movie database.
     """
-    def __init__(self, storage: MovieStorage):
+    def __init__(self, storage: MovieStorage) -> None:
         """
         Initialize the service with its required storage dependency.
 
@@ -52,7 +53,7 @@ class MovieService:
         self.logger = get_logger()
         self.storage = storage
 
-    def recommend_movie(self, user_choice_str: str) -> tuple:
+    def recommend_movie(self, user_choice_str: str) -> tuple[MovieStatus, dict[str, str]]:
         """
         Recommend a random movie from a user-selected genre.
 
@@ -76,7 +77,7 @@ class MovieService:
         """
         
         
-        movies = self.storage.load_movies()
+        movies: MovieData = self.storage.load_movies()
         
         genre_names = list(movies.keys())
           
@@ -98,7 +99,7 @@ class MovieService:
         self.logger.info(f"Successfully recommended '{chosen_movie}' from '{selected_genre}' genre to user")
         return MovieStatus.SUCCESS, {selected_genre : chosen_movie}
   
-    def add_movie(self, user_genre:  str, user_movie: str) -> MovieStatus:
+    def add_movie(self, user_genre: str, user_movie: str) -> MovieStatus:
         """
         Add a new movie to the database under a given genre.
 
@@ -123,7 +124,7 @@ class MovieService:
             to storage failed.
         """
       
-        movies = self.storage.load_movies()
+        movies: MovieData = self.storage.load_movies()
                             
         is_valid, result = MovieValidator.validate_genre(user_genre)
         if not is_valid:
@@ -160,7 +161,7 @@ class MovieService:
       
         return MovieStatus.SAVE_ERROR
   
-    def search_movie(self, user_movie: str) -> tuple:
+    def search_movie(self, user_movie: str) -> tuple[MovieStatus, MovieData]:
         """
         Search the database for movies whose titles contain a query string.
 
@@ -180,7 +181,7 @@ class MovieService:
             `(MovieStatus.EMPTY_MOVIE, {})` if the query was blank.
         """
       
-        movies = self.storage.load_movies()
+        movies: MovieData = self.storage.load_movies()
         
         is_valid, result = MovieValidator.validate_movie(user_movie)
         if not is_valid:
@@ -188,7 +189,7 @@ class MovieService:
             return result, {}
         clean_movie = result
         
-        found_movies = {}
+        found_movies: MovieData = {}
         for genre, movies_list in movies.items():
             searching_movies = [
                 movie for movie in movies_list
@@ -234,7 +235,7 @@ class MovieService:
             `MovieStatus.NOT_FOUND` if no matching movie exists.
         """
     
-        movies = self.storage.load_movies()
+        movies: MovieData = self.storage.load_movies()
       
         is_valid, result = MovieValidator.validate_movie(user_movie)
         if not is_valid:
@@ -260,7 +261,7 @@ class MovieService:
         self.logger.warning(f"Delete failed: Movie '{clean_movie.title()}' not found")
         return MovieStatus.NOT_FOUND
   
-    def get_movies_data(self) -> dict:
+    def get_movies_data(self) -> MovieData:
         """
         Retrieve the entire movie database as currently stored.
 

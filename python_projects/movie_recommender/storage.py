@@ -15,6 +15,7 @@ the user has added anything of their own.
 
 import json
 from logger_config import get_logger
+from models import MovieData
 
 class MovieStorage:
     """
@@ -33,12 +34,12 @@ class MovieStorage:
             record warnings and errors encountered during file I/O.
     """
     
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str) -> None:
         self.file_name = file_name
         self.logger = get_logger()
         
     @staticmethod
-    def get_default_movies() -> dict:
+    def get_default_movies() -> MovieData:
         """
         Build and return the default (seed) movie database.
 
@@ -63,7 +64,7 @@ class MovieStorage:
         
         return movies
     
-    def load_movies(self) -> dict:
+    def load_movies(self) -> MovieData:
         """
         Load the movie database from the JSON storage file.
 
@@ -87,7 +88,7 @@ class MovieStorage:
         
         try:
             with open(self.file_name, 'r', encoding='utf-8') as file:
-                movies = json.load(file)
+                movies: MovieData = json.load(file)
               
                 return movies
             
@@ -111,7 +112,7 @@ class MovieStorage:
             
             return {}
           
-    def save_movies(self, movies: dict) -> bool:
+    def save_movies(self, movies: MovieData) -> bool:
         """
         Persist the movie database to the JSON storage file.
 
