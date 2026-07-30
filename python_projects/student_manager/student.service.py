@@ -18,9 +18,16 @@ class, the UI layer (``main.py``) can remain a thin presentation shell
 that never needs to know about validation rules or storage mechanics.
 """
 
+from typing import TypedDict
 from validators import StudentValidator
+from storage import JSONStudentStorage
 from logger_config import get_logger
 from status import StudentStatus
+
+class StudentData(TypedDict):
+    name: str
+    age: int
+    score: int | float
 
 class StudentService:
     """Coordinates validation, persistence, and business rules for students.
@@ -41,7 +48,7 @@ class StudentService:
             operation performed by this service.
     """
     
-    def __init__(self, storage: JSONStudentStorage):
+    def __init__(self, storage: JSONStudentStorage) -> None:
         """Initialize the service with its storage backend and logger."""
         
         self.storage = storage
@@ -74,7 +81,7 @@ class StudentService:
         """
 
         
-        students = self.storage.load_students()
+        students: list[StudentData] = self.storage.load_students()
           
         # check students' name format
         is_valid, result_name = StudentValidator.validate_name(name)
@@ -103,7 +110,7 @@ class StudentService:
         clean_score = result_score
           
         # Store student information in dictionary format
-        student = {
+        student: StudentData = {
             'name' : clean_name,
             'age' : clean_age,
             'score' : clean_score
@@ -118,7 +125,7 @@ class StudentService:
             return StudentStatus.SAVE_ERROR
             
       
-    def get_students(self) -> list:
+    def get_students(self) -> list[StudentData]:
         """Retrieves the full, unfiltered list of student records currently
         persisted in storage. This is a thin, read-only pass-through to
         the storage layer, provided so that calling code never needs to
@@ -132,7 +139,7 @@ class StudentService:
       
         return self.storage.load_students()
         
-    def search_students(self, name: str) -> tuple:
+    def search_students(self, name: str) -> tuple[StudentStatus, list[StudentData]]:
         """Function that searches a student from the list
 
         Validates the provided search term, then performs a
@@ -155,7 +162,7 @@ class StudentService:
             matching student dictionaries.
         """
       
-        students = self.storage.load_students()
+        students: list[StudentData] = self.storage.load_students()
         
         # check whether it is in a true format
         is_valid, result_name  = StudentValidator.validate_name(name)
@@ -165,10 +172,9 @@ class StudentService:
         clean_name = result_name
         
         # Track whether the student exists in the register
-        found_students = []
-        for student in students:
-            if clean_name.lower() in student['name'].lower():
-                found_students.append(student)
+        found_students = [
+            student for student in students if clean_name.lower() in student['name'].lower()
+        ]
                 
         if not found_students:
             self.logger.info(f"Search failed, no students found matching '{clean_name.title()}'")
@@ -198,7 +204,7 @@ class StudentService:
             was removed and the change was saved successfully.
         """
       
-        students = self.storage.load_students()
+        students: list[StudentData] = self.storage.load_students()
         
         is_valid, result_name = StudentValidator.validate_name(name)
         if not is_valid:

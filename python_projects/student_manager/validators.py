@@ -41,7 +41,7 @@ class StudentValidator:
     """
     
     @staticmethod
-    def validate_name(name: str):
+    def validate_name(name: str) -> tuple[bool, StudentStatus | str]:
         """
         Validation functions for Student Manager.
 
@@ -77,7 +77,7 @@ class StudentValidator:
         return True, cleaned_name
         
     @staticmethod 
-    def validate_age(age_str: str):
+    def validate_age(age_str: str) -> tuple[bool, StudentStatus | int]:
         """
         Checking the student's age (Positive integer only)
 
@@ -121,7 +121,7 @@ class StudentValidator:
             return False, StudentStatus.INVALID_AGE_FORMAT
     
     @staticmethod  
-    def validate_score(score_str: str):
+    def validate_score(score_str: str) -> tuple[bool, StudentStatus | int | float]:
         """
         Checking a student's exam score (a number from 0 to 100)
 

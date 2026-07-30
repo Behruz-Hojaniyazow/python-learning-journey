@@ -17,7 +17,13 @@ storage-related problems occur.
 """
 
 import json
+from typing import TypedDict
 from logger_config import get_logger
+
+class StudentData(TypedDict):
+    name: str
+    age: int
+    score: int | float
 
 class JSONStudentStorage:
     """Handles reading and writing student records to a local JSON file.
@@ -35,7 +41,7 @@ class JSONStudentStorage:
             record warnings and errors encountered during file access.
     """
     
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str) -> None:
         """Initialize the storage handler with a target file path.
 
         Args:
@@ -46,7 +52,7 @@ class JSONStudentStorage:
         self.file_name = file_name
         self.logger = get_logger()
         
-    def load_students(self) -> list:
+    def load_students(self) -> list[StudentData]:
         """
         Reads students from a JSON file
 
@@ -67,7 +73,7 @@ class JSONStudentStorage:
         try:
         
             with open(self.file_name, 'r', encoding='utf-8') as file:
-                students = json.load(file)
+                students: list[StudentData] = json.load(file)
                 return students
           
         except FileNotFoundError:
@@ -84,7 +90,7 @@ class JSONStudentStorage:
             self.logger.exception(f"Unexpected error occurred in [{self.file_name}] file")
             return []
         
-    def save_students(self, students: list) -> bool:
+    def save_students(self, students: list[StudentData]) -> bool:
         """
         Function that saves students information to the file as a JSON file
         Returns True if saved successfully, False otherwise.

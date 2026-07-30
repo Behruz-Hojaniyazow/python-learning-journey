@@ -26,6 +26,7 @@ Module-level constants:
 """
 
 import sys
+from typing import NoReturn
 from student_service import StudentService
 from logger_config import get_logger
 from status import StudentStatus
@@ -50,7 +51,7 @@ COMMON_ERRORS = {
     StudentStatus.NOT_FOUND : "⚠️ Entered name not found from the Class Register"
 }
 
-def ui_add_student():
+def ui_add_student() -> None:
     """Run the interactive "Add Student" workflow.
 
     Repeatedly prompts the user for a student's name, age, and score,
@@ -113,7 +114,7 @@ def ui_add_student():
         
         print(message)
         
-def ui_search_students():
+def ui_search_students() -> None:
     """Run the interactive "Search Student" workflow.
 
     Guards against searching an empty class register by informing the
@@ -166,7 +167,7 @@ def ui_search_students():
                 )
                 print("-" * 40)
 
-def ui_show_students():
+def ui_show_students() -> None:
     """Display all registered students in a formatted, ranked table.
 
     Retrieves the full list of student records via
@@ -202,7 +203,7 @@ def ui_show_students():
         )
         print("-" * 43)
     
-def ui_delete_students():
+def ui_delete_students() -> None:
     """Run the interactive "Delete Student" workflow.
 
     Guards against deleting from an empty class register by informing the
@@ -299,7 +300,7 @@ def ui_delete_students():
             else:
                 print("\n⚠️ Please enter only (yes/no)")
 
-def ui_exit_app():
+def ui_exit_app() -> NoReturn:
     """Terminate the application gracefully.
 
     Prints a farewell message to the user and immediately exits the
@@ -316,7 +317,7 @@ def ui_exit_app():
     print("\nThank you for using Kryos Student Manager System, Goodbye 👋🏼")
     sys.exit()            
             
-def main():
+def main() -> None:
     """Run the main application loop for the Kryos Student Manager System.
 
     Builds the top-level ``menu_actions`` dispatch table, mapping each

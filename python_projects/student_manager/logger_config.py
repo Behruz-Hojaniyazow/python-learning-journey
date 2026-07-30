@@ -29,7 +29,7 @@ from config import (
   CONSOLE_FORMAT
 )
 
-def get_logger():
+def get_logger() -> logging.Logger:
     """Create, configure, and return the application's shared logger.
 
     This function implements a singleton-like retrieval pattern: it fetches
