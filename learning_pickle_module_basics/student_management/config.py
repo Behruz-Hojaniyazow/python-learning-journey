@@ -1,0 +1,1 @@
+FILE_NAME = "students_info.pkl"
