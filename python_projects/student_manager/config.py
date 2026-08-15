@@ -7,6 +7,6 @@ CONSOLE_FORMAT = '%(levelname)s: %(message)s'
 
 # Restrictions
 MAX_AGE = 120
-MIN_AGE = 0
+MIN_AGE = 6
 MAX_SCORE = 100
 MIN_SCORE = 0
