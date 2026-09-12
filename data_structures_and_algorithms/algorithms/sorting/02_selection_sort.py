@@ -1,4 +1,5 @@
 def selection_sort(numbers: list[int]) -> list[int]:
+    """Sort a list of integers in descending order using Selection Sort."""
     
     n = len(numbers)
     
